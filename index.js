@@ -134,8 +134,23 @@ var matrixDemo3 = [
 
 
 //console.log(findMatricesOfLine(complexMatrix, complexLines, 1));
-console.log(allMatrices(complexMatrix, complexLines));
+console.log(bestMatrix(complexMatrix, complexLines));
 
+function bestMatrix(matrix, lines){
+    "use strict";
+    let score = 1000000;
+    let ret = [];
+    allMatrices(matrix, lines)
+        .forEach((value)=>{
+            let tmpScore = calculateScore(value);
+            if(tmpScore<score){
+                score = tmpScore;
+                ret = value;
+            }
+        });
+    console.log(score);
+    return ret;
+}
 
 
 function allMatrices(matrix, lines){
