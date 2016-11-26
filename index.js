@@ -132,20 +132,6 @@ random = allPaths(matrixUsed, linesUsed[pos-1], x,y, pos, 0, linesUsed[pos-1][0]
 random.forEach(value=>console.log(value));
 //random.forEach(value=>console.log(calculateScore(value)));
 
-/*
- [ [ -1, -1, [ 1 ], -1 ],
- [ -1, -1, [ 1 ], -1 ],
- [ [ 1 ], [ 1 ], [ 1 ], 0 ],
- [ [ 1 ], [ 1 ], [ 1 ], 0 ] ]
-
- */
-/*var tmpMatrix =  [ [ -1, -1, [ 1 ], -1 ],
-    [ -1, -1, [ 1 ], -1 ],
-    [ [ 1 ], [ 1 ], [ 1 ], 0 ],
-    [ [ 1 ], [ 1 ], [ 1 ], 0 ] ];
-console.log(validateLine(tmpMatrix, lines[0], 1));
-console.log(tmpMatrix[lines[0][0][0]][lines[0][0][1]], tmpMatrix[lines[0][1][0]][lines[0][1][1]]);*/
-//console.log(validateLines(matrixDemo, lines));
 
 function calculateScore(matrix){
     "use strict";
@@ -192,11 +178,10 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
         else
             return [];*/
 
-    //TODO break if I have two parallel lines? without blank?
-
     if(x == line[1][0] && y == line[1][1])
         return [matrix];
 
+    //break if I have two parallel lines? without blank?
     if(angleInfo.turned>=2)
         return [];
 
