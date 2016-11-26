@@ -69,11 +69,16 @@ Array.newWithElement = function (size, element){
 };
 
 // CONFIG
-const LENGHT_SCORE = 1;
+const LENGTH_SCORE = 1;
 const ANGLE_SCORE = 5;
 const OVERLAPPING_SCORE = 30;
-const RIGHT_CONSTRAINT = true;
-const ALLOW_TWO_ANGLES = true;
+const RIGHT_CONSTRAINT = true; //the arrows cannot come back in the horizontal line (if I start from the right side I can go only to left)
+const ALLOW_TWO_ANGLES = true; //allow to have two near angles, in the case this bring to go to the original direction
+/*
+* BEST CONFIG for performance
+* RIGHT_CONSTRAINT = true;
+* ALLOW_TWO_ANGLES = false;
+ */
 
 var baseMatrix = [
     [-1,-1,0,-1],
@@ -210,7 +215,7 @@ function calculateScore(matrix){
             if(!Array.isArray(value2))
                 continue;
             score += (value2.length-1)*OVERLAPPING_SCORE;
-            score += value2.length*LENGHT_SCORE;
+            score += value2.length*LENGTH_SCORE;
             score += calculateAnglesNumber(matrix, valueIndex, value2Index)*ANGLE_SCORE;
         }
     }
