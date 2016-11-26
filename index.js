@@ -54,6 +54,10 @@ var lines = [
     [[2,3],[3,0]]
 ];
 
+var oneLine = [
+    [[0,2],[2,0]],
+];
+
 var matrixDemo = [
     [-1,-1,[1],-1],
     [-1,-1,[1],-1],
@@ -80,7 +84,8 @@ console.log(calculateScore(matrixDemo2));
 console.log(calculateScore(matrixDemo3));*/
 
 //console.log(validateLine(matrixDemo, lines[1], 2));
-console.log(randomMatrices(baseMatrix, lines));
+var random = randomMatrices(baseMatrix, lines);
+random.map(value=>console.log(value));
 //console.log(validateLines(matrixDemo, lines));
 
 function calculateScore(matrix){
@@ -115,12 +120,13 @@ function calculateAnglesNumber(matrix, x, y){
 
 function randomMatrices(model, lines){
     "use strict";
-    let solutions = Array.newWithElement(100000, []);
+    let solutions = Array.newWithElement(1000, []);
     return solutions
         .map((value)=>{
             return  randomMatrix(model, lines);
         })
         .filter((matrix)=>{
+            //return true;
             return validateLines(matrix, lines);
         });
 }
@@ -128,14 +134,32 @@ function randomMatrices(model, lines){
 function randomMatrix(matrix, lines){
     "use strict";
     return matrix
-        .map(value=>{
+        .map((value, pos)=>{
            return value
-               .map(value2=>{
+               .map((value2, pos2)=>{
                   if(value2==-1)
                       return value2;
-                  return Math.randBounds(0,lines.length);
+                  return valuesForPoint(matrix, pos, pos2, lines);
                });
         });
+}
+
+function valuesForPoint(matrix, x, y , lines){
+    "use strict";
+    let points = lines
+        .map((line, pos)=>{return {"pos": pos, "line": line};})
+        .filter(line=>inStartEnd(line.line, x, y))
+        .map(line=>line.pos+1);
+    //if there is at leas one start/end no other points
+    if(points.length)
+        return points;
+    points = Array.newWithElement(Math.randBounds(0,lines.length), []);
+    points = points
+        .map(point=>Math.randBounds(1,lines.length))
+        .filter((elem, pos, arr) =>  arr.indexOf(elem) == pos); //uinique
+    if(points.length==0)
+        return 0;
+    return points;
 }
 
 function validateLines(matrix, lines) {
@@ -162,8 +186,7 @@ function validateLine(matrix, line, name){
             if(found)
                 //TODO check that end or start has count == 1
                 //end or start
-                if ((valueIndex == line[0][0] && value2Index == line[0][1])
-                        || (valueIndex == line[1][0] && value2Index == line[1][1])) {
+                if (inStartEnd(line, valueIndex, value2Index)) {
                     if (count < 1) //this can cause more than one enter point in the start/end
                         return false;
                 }else if (count<=1)
@@ -186,4 +209,10 @@ function validPoint(matrix, x, y, value){
     if(matrix.search(x,y+1,value))
         count++;
     return count;
+}
+
+function inStartEnd(line, x, y){
+    "use strict";
+    return (x == line[0][0] && y == line[0][1])
+        || (x == line[1][0] && y == line[1][1]);
 }
