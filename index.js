@@ -58,6 +58,23 @@ var oneLine = [
     [[0,2],[2,0]],
 ];
 
+
+var complexMatrix = [
+    [-1,-1,0,-1, 0, 0, 0],
+    [-1,-1,0,-1, 0, 0, 0],
+    [0,0,0,0, 0, 0, 0],
+    [0,0,0,0, 0, 0, 0],
+    [0,0,0,0, 0, 0, 0],
+    [0,0,0,0, 0, 0, 0],
+    [0,0,0,0, 0, 0, 0],
+    [0,0,0,0, 0, 0, 0],
+];
+
+var complexLines = [
+    [[0,4],[6,0]],
+    [[2,3],[3,0]]
+];
+
 var matrixDemo = [
     [-1,-1,[1],-1],
     [-1,-1,[1],-1],
@@ -84,7 +101,7 @@ console.log(calculateScore(matrixDemo2));
 console.log(calculateScore(matrixDemo3));*/
 
 //console.log(validateLine(matrixDemo, lines[1], 2));
-var random = randomMatrices(baseMatrix, lines);
+var random = randomMatrices(complexMatrix, complexLines);
 random.map(value=>console.log(value));
 //console.log(validateLines(matrixDemo, lines));
 
