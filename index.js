@@ -218,7 +218,7 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
     }else
         end = true;
 
-    //if(right)
+    if(right)
         if(matrix.isValidPoint(x, y+1) && matrix[x][y+1] == 0){
             let tmpMatrix = matrix.clone();
             tmpMatrix[x][y+1] = [value];
@@ -248,7 +248,7 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
         end = true;
 
 
-    //if(!right)
+    if(!right)
         if(matrix.isValidPoint(x, y-1) && matrix[x][y-1] == 0){
             let tmpMatrix = matrix.clone();
             tmpMatrix[x][y-1] = [value];
