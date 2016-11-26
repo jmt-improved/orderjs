@@ -12,6 +12,23 @@ Array.prototype.isValidPoint = function(x, y){
         return false;
     return true;
 };
+Array.prototype.mergeMatrix = function(matrix){
+    "use strict";
+    return this.map((value,pos)=>value.map((value2,pos2)=>{
+        let valueM = matrix[pos][pos2];
+        if(!Array.isArray(value2)){
+            if(value2 == -1)
+                return -1;
+            if(!Array.isArray(valueM))
+                return 0;
+            return valueM;
+        }
+        if(!Array.isArray(valueM))
+            return value2;
+        return value2.concat(matrix[pos][pos2]);
+        }));
+};
+
 Object.prototype.search = function(x, y,value){
     "use strict";
     let obj = this;
@@ -116,9 +133,38 @@ var matrixDemo3 = [
 ]; //TODO in that case one more angle is counted for 2 because we don't know the "start", maybe we should enumerate the point of a line
 
 
-console.log(findMatricesOfLine(complexMatrix, complexLines, 1));
+//console.log(findMatricesOfLine(complexMatrix, complexLines, 1));
+console.log(allMatrices(complexMatrix, complexLines));
 
 
+
+function allMatrices(matrix, lines){
+    "use strict";
+    let matrices = lines.map((line,pos)=>findMatricesOfLine(matrix,lines,pos+1));
+    let combinations = getCombinations(matrices);
+    return combinations;
+}
+
+function getCombinations(matrices, choosen, level){
+    "use strict";
+    level = level || 0;
+    let combinations = [];
+    choosen = choosen || Array.newWithElement(matrices.length, -1);
+    let firstElement = 0;
+    for(;choosen[firstElement]!=-1 && firstElement<choosen.length;firstElement++);
+    //console.log(level, firstElement, choosen);
+    if(firstElement==choosen.length && choosen[firstElement]!=-1) {
+        return [choosen.reduce((a, b, pos)=>a.mergeMatrix(matrices[pos][b]), matrices[choosen.length-1][choosen.pop()])]; //remove last
+    }
+
+    matrices[firstElement]
+        .forEach((value, pos)=>{
+            let tmpChosen = choosen.clone();
+            tmpChosen[firstElement] = pos;
+            combinations = combinations.concat(getCombinations(matrices, tmpChosen, level+1));
+        });
+    return combinations;
+}
 
 
 
