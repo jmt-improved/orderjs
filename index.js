@@ -229,13 +229,13 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
     "use strict";
     //level = level || 0;
     var matrices = [];
-    angleInfo = angleInfo || {direction: 0, turned: 0};
+    angleInfo = angleInfo || {direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0};
 
     if(x == line[1][0] && y == line[1][1])
         return [matrix];
 
     //break if I have two parallel lines? without blank?
-    if(angleInfo.turned>=2)
+    if(angleInfo.turned>=2 && angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)
         return [];
 
 
@@ -246,6 +246,8 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
         let tmpMatrix = matrix.clone();
         tmpMatrix[x+1][y] = [value];
         let tmpAngleInfo = angleInfo.clone();
+        tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
+        tmpAngleInfo.previousDirection = tmpAngleInfo.direction;
         tmpAngleInfo.direction = 1;
         if(tmpAngleInfo.direction!=angleInfo.direction)
             tmpAngleInfo.turned++;
@@ -261,6 +263,8 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
             let tmpMatrix = matrix.clone();
             tmpMatrix[x][y+1] = [value];
             let tmpAngleInfo = angleInfo.clone();
+            tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
+            tmpAngleInfo.previousDirection = tmpAngleInfo.direction;
             tmpAngleInfo.direction = 2;
             if(tmpAngleInfo.direction!=angleInfo.direction)
                 tmpAngleInfo.turned++;
@@ -275,6 +279,8 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
         let tmpMatrix = matrix.clone();
         tmpMatrix[x-1][y] = [value];//[value+' '+level];
         let tmpAngleInfo = angleInfo.clone();
+        tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
+        tmpAngleInfo.previousDirection = tmpAngleInfo.direction;
         tmpAngleInfo.direction = 3;
         if(tmpAngleInfo.direction!=angleInfo.direction)
             tmpAngleInfo.turned++;
@@ -291,6 +297,8 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
             let tmpMatrix = matrix.clone();
             tmpMatrix[x][y-1] = [value];
             let tmpAngleInfo = angleInfo.clone();
+            tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
+            tmpAngleInfo.previousDirection = tmpAngleInfo.direction;
             tmpAngleInfo.direction = 4;
             if(tmpAngleInfo.direction!=angleInfo.direction)
                 tmpAngleInfo.turned++;
