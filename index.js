@@ -51,9 +51,10 @@ Array.newWithElement = function (size, element){
 };
 
 // CONFIG
-const lengthScore = 1;
-const angleScore = 5;
-const overlappingScore = 30;
+const LENGHT_SCORE = 1;
+const ANGLE_SCORE = 5;
+const OVERLAPPING_SCORE = 30;
+const RIGHT_CONSTRAINT = true;
 
 var baseMatrix = [
     [-1,-1,0,-1],
@@ -88,10 +89,10 @@ var complexLines = [
     [[2,3],[3,0]]
 ];
 
-complexLines = [
+/*complexLines = [
     [[6,6],[0,4]],
     [[2,3],[3,0]]
-];
+];*/
 
 var matrixDemo = [
     [-1,-1,[1],-1],
@@ -114,23 +115,19 @@ var matrixDemo3 = [
     [[2],[2],[2],[2]],
 ]; //TODO in that case one more angle is counted for 2 because we don't know the "start", maybe we should enumerate the point of a line
 
-/*console.log(calculateScore(matrixDemo));
-console.log(calculateScore(matrixDemo2));
-console.log(calculateScore(matrixDemo3));*/
 
-//console.log(validateLine(matrixDemo, lines[1], 2));
-//var random = randomMatrices(complexMatrix, complexLines);
-var random = [];
-//baseMatrix.forEach((val, pos)=>val.forEach((val2,pos2)=>{random = random.concat(allPaths(complexMatrix, complexLines, pos, pos2, 1));}));
-var matrixUsed = complexMatrix;
-var linesUsed = complexLines;
-var pos = 1;
-var x = linesUsed[pos-1][0][0];
-var y = linesUsed[pos-1][0][1];
-random = allPaths(matrixUsed, linesUsed[pos-1], x,y, pos, 0, linesUsed[pos-1][0][1]<linesUsed[pos-1][1][1]);
-//console.log(random);
-random.forEach(value=>console.log(value));
-//random.forEach(value=>console.log(calculateScore(value)));
+console.log(findMatricesOfLine(complexMatrix, complexLines, 1));
+
+
+
+
+
+function findMatricesOfLine(matrix, lines, pos){
+    "use strict";
+    var x = lines[pos-1][0][0];
+    var y = lines[pos-1][0][1];
+    return allPaths(matrix, lines[pos-1], x,y, pos, 0, lines[pos-1][0][1]<lines[pos-1][1][1]);
+}
 
 
 function calculateScore(matrix){
@@ -142,9 +139,9 @@ function calculateScore(matrix){
             let value2 = value[value2Index];
             if(!Array.isArray(value2))
                 continue;
-            score += (value2.length-1)*overlappingScore;
-            score += value2.length*lengthScore;
-            score += calculateAnglesNumber(matrix, valueIndex, value2Index)*angleScore;
+            score += (value2.length-1)*OVERLAPPING_SCORE;
+            score += value2.length*LENGHT_SCORE;
+            score += calculateAnglesNumber(matrix, valueIndex, value2Index)*ANGLE_SCORE;
         }
     }
     return score;
@@ -169,14 +166,6 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
     //level = level || 0;
     var matrices = [];
     angleInfo = angleInfo || {direction: 0, turned: 0};
-
-    //if(x == 5 && y == 5 && level == 10)
-        //console.log(x,y, level, matrix);
-    /*if(level==10)
-        if(validateLine(matrix, line[value-1], value))
-            return [matrix];
-        else
-            return [];*/
 
     if(x == line[1][0] && y == line[1][1])
         return [matrix];
@@ -203,7 +192,7 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
     }else
         end = true;
 
-    if(right)
+    if(right || !RIGHT_CONSTRAINT)
         if(matrix.isValidPoint(x, y+1) && matrix[x][y+1] == 0){
             let tmpMatrix = matrix.clone();
             tmpMatrix[x][y+1] = [value];
@@ -233,7 +222,7 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
         end = true;
 
 
-    if(!right)
+    if(!right || !RIGHT_CONSTRAINT)
         if(matrix.isValidPoint(x, y-1) && matrix[x][y-1] == 0){
             let tmpMatrix = matrix.clone();
             tmpMatrix[x][y-1] = [value];
