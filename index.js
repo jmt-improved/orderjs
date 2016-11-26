@@ -21,6 +21,7 @@ Array.prototype.mergeMatrix = function(matrix){
                 return -1;
             if(!Array.isArray(valueM))
                 return 0;
+
             return valueM;
         }
         if(!Array.isArray(valueM))
@@ -134,7 +135,7 @@ var matrixDemo3 = [
 
 
 //console.log(findMatricesOfLine(complexMatrix, complexLines, 1));
-console.log(bestMatrix(complexMatrix, complexLines));
+console.log(bestMatrix(baseMatrix, lines));
 
 function bestMatrix(matrix, lines){
     "use strict";
@@ -187,6 +188,8 @@ function findMatricesOfLine(matrix, lines, pos){
     "use strict";
     var x = lines[pos-1][0][0];
     var y = lines[pos-1][0][1];
+    matrix = matrix.clone();
+    matrix[x][y] = [pos];
     return allPaths(matrix, lines[pos-1], x,y, pos, 0, lines[pos-1][0][1]<lines[pos-1][1][1]);
 }
 
