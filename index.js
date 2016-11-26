@@ -178,12 +178,14 @@ function calculateAnglesNumber(matrix, x, y){
 }
 
 
-function allPaths(matrix, line, x, y, value, level, right){
+function allPaths(matrix, line, x, y, value, level, right, angleInfo){
     "use strict";
     //level = level || 0;
     var matrices = [];
+    angleInfo = angleInfo || {direction: 0, turned: 0};
+
     //if(x == 5 && y == 5 && level == 10)
-        console.log(x,y, level, matrix);
+        //console.log(x,y, level, matrix);
     /*if(level==10)
         if(validateLine(matrix, line[value-1], value))
             return [matrix];
@@ -195,6 +197,9 @@ function allPaths(matrix, line, x, y, value, level, right){
     if(x == line[1][0] && y == line[1][1])
         return [matrix];
 
+    if(angleInfo.turned>=2)
+        return [];
+
 
     //recursion
     var end = false;
@@ -202,16 +207,28 @@ function allPaths(matrix, line, x, y, value, level, right){
     if(matrix.isValidPoint(x+1, y) && matrix[x+1][y] == 0){
         let tmpMatrix = matrix.clone();
         tmpMatrix[x+1][y] = [value];
-        let tmp = allPaths(tmpMatrix, line, x+1, y, value, level+1, right);
+        let tmpAngleInfo = angleInfo.clone();
+        tmpAngleInfo.direction = 1;
+        if(tmpAngleInfo.direction!=angleInfo.direction)
+            tmpAngleInfo.turned++;
+        else
+            tmpAngleInfo.turned = 0;
+        let tmp = allPaths(tmpMatrix, line, x+1, y, value, level+1, right,tmpAngleInfo);
         matrices = matrices.concat(tmp);
     }else
         end = true;
 
-    if(right)
+    //if(right)
         if(matrix.isValidPoint(x, y+1) && matrix[x][y+1] == 0){
             let tmpMatrix = matrix.clone();
             tmpMatrix[x][y+1] = [value];
-            let tmp = allPaths(tmpMatrix, line, x, y+1, value, level+1, right);
+            let tmpAngleInfo = angleInfo.clone();
+            tmpAngleInfo.direction = 2;
+            if(tmpAngleInfo.direction!=angleInfo.direction)
+                tmpAngleInfo.turned++;
+            else
+                tmpAngleInfo.turned = 0;
+            let tmp = allPaths(tmpMatrix, line, x, y+1, value, level+1, right,tmpAngleInfo);
             matrices = matrices.concat(tmp);
         }else
             end = true;
@@ -219,23 +236,35 @@ function allPaths(matrix, line, x, y, value, level, right){
     if(matrix.isValidPoint(x-1, y) && matrix[x-1][y] == 0){
         let tmpMatrix = matrix.clone();
         tmpMatrix[x-1][y] = [value];//[value+' '+level];
-        let tmp = allPaths(tmpMatrix, line, x-1, y, value, level+1, right);
+        let tmpAngleInfo = angleInfo.clone();
+        tmpAngleInfo.direction = 3;
+        if(tmpAngleInfo.direction!=angleInfo.direction)
+            tmpAngleInfo.turned++;
+        else
+            tmpAngleInfo.turned = 0;
+        let tmp = allPaths(tmpMatrix, line, x-1, y, value, level+1, right,tmpAngleInfo);
         matrices = matrices.concat(tmp);
     }else
         end = true;
 
 
-    if(!right)
+    //if(!right)
         if(matrix.isValidPoint(x, y-1) && matrix[x][y-1] == 0){
             let tmpMatrix = matrix.clone();
             tmpMatrix[x][y-1] = [value];
-            let tmp = allPaths(tmpMatrix, line, x, y-1, value, level+1, right);
+            let tmpAngleInfo = angleInfo.clone();
+            tmpAngleInfo.direction = 4;
+            if(tmpAngleInfo.direction!=angleInfo.direction)
+                tmpAngleInfo.turned++;
+            else
+                tmpAngleInfo.turned = 0;
+            let tmp = allPaths(tmpMatrix, line, x, y-1, value, level+1, right,tmpAngleInfo);
             matrices = matrices.concat(tmp);
         }else
             end = true;
 
-    if(end && validateLine(matrix, line[value-1], value))
-        matrices.push(matrix);
+    /*if(end && validateLine(matrix, line[value-1], value))
+        matrices.push(matrix);*/
 
 
     return matrices;
