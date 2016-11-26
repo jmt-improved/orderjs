@@ -73,6 +73,7 @@ const LENGHT_SCORE = 1;
 const ANGLE_SCORE = 5;
 const OVERLAPPING_SCORE = 30;
 const RIGHT_CONSTRAINT = true;
+const ALLOW_TWO_ANGLES = true;
 
 var baseMatrix = [
     [-1,-1,0,-1],
@@ -135,7 +136,12 @@ var matrixDemo3 = [
 
 
 //console.log(findMatricesOfLine(complexMatrix, complexLines, 1));
-console.log(bestMatrix(baseMatrix, lines));
+//console.log(bestMatrix(baseMatrix, lines));
+var t0 = new Date().getTime();
+console.log(bestMatrix(complexMatrix, complexLines));
+var t1 = new Date().getTime();
+console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
+
 
 function bestMatrix(matrix, lines){
     "use strict";
@@ -235,7 +241,7 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo){
         return [matrix];
 
     //break if I have two parallel lines? without blank?
-    if(angleInfo.turned>=2 && angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)
+    if(angleInfo.turned>=2 && (!ALLOW_TWO_ANGLES || (angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)))
         return [];
 
 
