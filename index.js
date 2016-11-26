@@ -1,21 +1,33 @@
 /**
  * Created by claudio on 26/11/16.
  */
-Object.prototype.search = function(x, y,value){
+
+Array.prototype.isValidPoint = function(x, y){
     "use strict";
-    let obj = this;
-    if(!Array.isArray(obj))
-        return false;
-    obj = obj[x];
+    let obj = this[x];
     if(obj == undefined)
         return false;
     obj = obj[y];
     if(obj == undefined)
         return false;
+    return true;
+};
+Object.prototype.search = function(x, y,value){
+    "use strict";
+    let obj = this;
+    if(!Array.isArray(obj))
+        return false;
+    if(!this.isValidPoint(x,y))
+        return false;
     if(!Array.isArray(obj))
         return false;
     let ret = obj.indexOf(value);
     return ret>=0;
+};
+
+Object.prototype.clone = function(){
+    "use strict";
+    return JSON.parse(JSON.stringify(this));
 };
 
 Math.randBounds = function(low, upper){
@@ -101,7 +113,10 @@ console.log(calculateScore(matrixDemo2));
 console.log(calculateScore(matrixDemo3));*/
 
 //console.log(validateLine(matrixDemo, lines[1], 2));
-var random = randomMatrices(complexMatrix, complexLines);
+//var random = randomMatrices(complexMatrix, complexLines);
+var random = [];
+baseMatrix.forEach((val, pos)=>val.forEach((val2,pos2)=>{random = random.concat(allPaths(baseMatrix, complexLines, pos, pos2, 1));}));
+//console.log(random);
 random.map(value=>console.log(value));
 //console.log(validateLines(matrixDemo, lines));
 
@@ -133,6 +148,58 @@ function calculateAnglesNumber(matrix, x, y){
             return true;
         return false;
     }).length;
+}
+
+
+function allPaths(matrix, line, x, y, value, level){
+    "use strict";
+    level = level || 0;
+    var matrices = [];
+    console.log(x,y, level);
+    /*if(level==1)
+        return matrix;*/
+
+    //TODO remove line
+
+
+    //recursion
+    var end = false;
+    if(matrix.isValidPoint(x+1, y) && matrix[x+1][y] == 0){
+        let tmpMatrix = matrix.clone();
+        tmpMatrix[x+1][y] = [value];
+        let tmp = allPaths(tmpMatrix, line, x+1, y, value, level+1);
+        matrices = matrices.concat(tmp);
+    }else
+        end = true;
+
+    if(matrix.isValidPoint(x, y+1) && matrix[x][y+1] != 0){
+        let tmpMatrix = matrix.clone();
+        tmpMatrix[x][y+1] = [value];
+        let tmp = allPaths(tmpMatrix, line, x, y+1, value, level+1);
+        matrices = matrices.concat(tmp);
+    }else
+        end = true;
+
+    if(matrix.isValidPoint(x-1, y) && matrix[x-1][y] == 0){
+        let tmpMatrix = matrix.clone();
+        tmpMatrix[x-1][y] = [value];//[value+' '+level];
+        let tmp = allPaths(tmpMatrix, line, x-1, y, value, level+1);
+        matrices = matrices.concat(tmp);
+    }else
+        end = true;
+
+    if(matrix.isValidPoint(x, y-1) && matrix[x][y-1] != 0){
+        let tmpMatrix = matrix.clone();
+        tmpMatrix[x][y-1] = [value];
+        let tmp = allPaths(tmpMatrix, line, x, y-1, value, level+1);
+        matrices = matrices.concat(tmp);
+    }else
+        end = true;
+
+    if(end && validateLine(matrix, line[value-1], value))
+        matrices.push(matrix);
+
+    return matrices;
 }
 
 function randomMatrices(model, lines){
@@ -198,7 +265,7 @@ function validateLine(matrix, line, name){
             let value2 = value[value2Index];
             let count = validPoint(matrix, valueIndex, value2Index, name);
             let found = matrix.search(valueIndex, value2Index, name);
-            //console.log(valueIndex, value2Index, value2, found, validPoint(matrix, valueIndex, value2Index, name),
+            //console.log(valueIndex, value2Index, value2, found, isValidPoint(matrix, valueIndex, value2Index, name),
             //    (valueIndex == line[0][0] && value2Index == line[0][1]),(valueIndex == line[1][0] && value2Index == line[1][1]));
             if(found)
                 //TODO check that end or start has count == 1
