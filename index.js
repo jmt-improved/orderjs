@@ -19,6 +19,7 @@ Object.prototype.search = function(x, y,value){
         return false;
     if(!this.isValidPoint(x,y))
         return false;
+    obj = obj[x][y];
     if(!Array.isArray(obj))
         return false;
     let ret = obj.indexOf(value);
@@ -115,9 +116,22 @@ console.log(calculateScore(matrixDemo3));*/
 //console.log(validateLine(matrixDemo, lines[1], 2));
 //var random = randomMatrices(complexMatrix, complexLines);
 var random = [];
-baseMatrix.forEach((val, pos)=>val.forEach((val2,pos2)=>{random = random.concat(allPaths(baseMatrix, complexLines, pos, pos2, 1));}));
+baseMatrix.forEach((val, pos)=>val.forEach((val2,pos2)=>{random = random.concat(allPaths(baseMatrix, lines, pos, pos2, 1));}));
 //console.log(random);
 random.map(value=>console.log(value));
+/*
+ [ [ -1, -1, [ 1 ], -1 ],
+ [ -1, -1, [ 1 ], -1 ],
+ [ [ 1 ], [ 1 ], [ 1 ], 0 ],
+ [ [ 1 ], [ 1 ], [ 1 ], 0 ] ]
+
+ */
+/*var tmpMatrix =  [ [ -1, -1, [ 1 ], -1 ],
+    [ -1, -1, [ 1 ], -1 ],
+    [ [ 1 ], [ 1 ], [ 1 ], 0 ],
+    [ [ 1 ], [ 1 ], [ 1 ], 0 ] ];
+console.log(validateLine(tmpMatrix, lines[0], 1));
+console.log(tmpMatrix[lines[0][0][0]][lines[0][0][1]], tmpMatrix[lines[0][1][0]][lines[0][1][1]]);*/
 //console.log(validateLines(matrixDemo, lines));
 
 function calculateScore(matrix){
@@ -155,9 +169,12 @@ function allPaths(matrix, line, x, y, value, level){
     "use strict";
     level = level || 0;
     var matrices = [];
-    console.log(x,y, level);
-    /*if(level==1)
-        return matrix;*/
+    //console.log(x,y, level, matrix);
+    /*if(level==30)
+        if(validateLine(matrix, line[value-1], value))
+            return [matrix];
+        else
+            return [];*/
 
     //TODO remove line
 
@@ -172,7 +189,7 @@ function allPaths(matrix, line, x, y, value, level){
     }else
         end = true;
 
-    if(matrix.isValidPoint(x, y+1) && matrix[x][y+1] != 0){
+    if(matrix.isValidPoint(x, y+1) && matrix[x][y+1] == 0){
         let tmpMatrix = matrix.clone();
         tmpMatrix[x][y+1] = [value];
         let tmp = allPaths(tmpMatrix, line, x, y+1, value, level+1);
@@ -188,7 +205,7 @@ function allPaths(matrix, line, x, y, value, level){
     }else
         end = true;
 
-    if(matrix.isValidPoint(x, y-1) && matrix[x][y-1] != 0){
+    if(matrix.isValidPoint(x, y-1) && matrix[x][y-1] == 0){
         let tmpMatrix = matrix.clone();
         tmpMatrix[x][y-1] = [value];
         let tmp = allPaths(tmpMatrix, line, x, y-1, value, level+1);
@@ -267,14 +284,15 @@ function validateLine(matrix, line, name){
             let found = matrix.search(valueIndex, value2Index, name);
             //console.log(valueIndex, value2Index, value2, found, isValidPoint(matrix, valueIndex, value2Index, name),
             //    (valueIndex == line[0][0] && value2Index == line[0][1]),(valueIndex == line[1][0] && value2Index == line[1][1]));
-            if(found)
+            if(found) {
                 //TODO check that end or start has count == 1
                 //end or start
                 if (inStartEnd(line, valueIndex, value2Index)) {
                     if (count < 1) //this can cause more than one enter point in the start/end
                         return false;
-                }else if (count<=1)
+                } else if (count <= 1)
                     return false;
+            }
         }
     }
     return true;
