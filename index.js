@@ -88,6 +88,11 @@ var complexLines = [
     [[2,3],[3,0]]
 ];
 
+complexLines = [
+    [[6,6],[0,4]],
+    [[2,3],[3,0]]
+];
+
 var matrixDemo = [
     [-1,-1,[1],-1],
     [-1,-1,[1],-1],
@@ -116,9 +121,17 @@ console.log(calculateScore(matrixDemo3));*/
 //console.log(validateLine(matrixDemo, lines[1], 2));
 //var random = randomMatrices(complexMatrix, complexLines);
 var random = [];
-baseMatrix.forEach((val, pos)=>val.forEach((val2,pos2)=>{random = random.concat(allPaths(baseMatrix, lines, pos, pos2, 1));}));
+//baseMatrix.forEach((val, pos)=>val.forEach((val2,pos2)=>{random = random.concat(allPaths(complexMatrix, complexLines, pos, pos2, 1));}));
+var matrixUsed = complexMatrix;
+var linesUsed = complexLines;
+var pos = 1;
+var x = linesUsed[pos-1][0][0];
+var y = linesUsed[pos-1][0][1];
+random = allPaths(matrixUsed, linesUsed[pos-1], x,y, pos, 0, linesUsed[pos-1][0][1]<linesUsed[pos-1][1][1]);
 //console.log(random);
-random.map(value=>console.log(value));
+random.forEach(value=>console.log(value));
+//random.forEach(value=>console.log(calculateScore(value)));
+
 /*
  [ [ -1, -1, [ 1 ], -1 ],
  [ -1, -1, [ 1 ], -1 ],
@@ -165,56 +178,65 @@ function calculateAnglesNumber(matrix, x, y){
 }
 
 
-function allPaths(matrix, line, x, y, value, level){
+function allPaths(matrix, line, x, y, value, level, right){
     "use strict";
-    level = level || 0;
+    //level = level || 0;
     var matrices = [];
-    //console.log(x,y, level, matrix);
-    /*if(level==30)
+    //if(x == 5 && y == 5 && level == 10)
+        console.log(x,y, level, matrix);
+    /*if(level==10)
         if(validateLine(matrix, line[value-1], value))
             return [matrix];
         else
             return [];*/
 
-    //TODO remove line
+    //TODO break if I have two parallel lines? without blank?
+
+    if(x == line[1][0] && y == line[1][1])
+        return [matrix];
 
 
     //recursion
     var end = false;
+
     if(matrix.isValidPoint(x+1, y) && matrix[x+1][y] == 0){
         let tmpMatrix = matrix.clone();
         tmpMatrix[x+1][y] = [value];
-        let tmp = allPaths(tmpMatrix, line, x+1, y, value, level+1);
+        let tmp = allPaths(tmpMatrix, line, x+1, y, value, level+1, right);
         matrices = matrices.concat(tmp);
     }else
         end = true;
 
-    if(matrix.isValidPoint(x, y+1) && matrix[x][y+1] == 0){
-        let tmpMatrix = matrix.clone();
-        tmpMatrix[x][y+1] = [value];
-        let tmp = allPaths(tmpMatrix, line, x, y+1, value, level+1);
-        matrices = matrices.concat(tmp);
-    }else
-        end = true;
+    if(right)
+        if(matrix.isValidPoint(x, y+1) && matrix[x][y+1] == 0){
+            let tmpMatrix = matrix.clone();
+            tmpMatrix[x][y+1] = [value];
+            let tmp = allPaths(tmpMatrix, line, x, y+1, value, level+1, right);
+            matrices = matrices.concat(tmp);
+        }else
+            end = true;
 
     if(matrix.isValidPoint(x-1, y) && matrix[x-1][y] == 0){
         let tmpMatrix = matrix.clone();
         tmpMatrix[x-1][y] = [value];//[value+' '+level];
-        let tmp = allPaths(tmpMatrix, line, x-1, y, value, level+1);
+        let tmp = allPaths(tmpMatrix, line, x-1, y, value, level+1, right);
         matrices = matrices.concat(tmp);
     }else
         end = true;
 
-    if(matrix.isValidPoint(x, y-1) && matrix[x][y-1] == 0){
-        let tmpMatrix = matrix.clone();
-        tmpMatrix[x][y-1] = [value];
-        let tmp = allPaths(tmpMatrix, line, x, y-1, value, level+1);
-        matrices = matrices.concat(tmp);
-    }else
-        end = true;
+
+    if(!right)
+        if(matrix.isValidPoint(x, y-1) && matrix[x][y-1] == 0){
+            let tmpMatrix = matrix.clone();
+            tmpMatrix[x][y-1] = [value];
+            let tmp = allPaths(tmpMatrix, line, x, y-1, value, level+1, right);
+            matrices = matrices.concat(tmp);
+        }else
+            end = true;
 
     if(end && validateLine(matrix, line[value-1], value))
         matrices.push(matrix);
+
 
     return matrices;
 }
