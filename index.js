@@ -156,8 +156,6 @@ class combinationClass{
 }
 
 
-
-
 function findMatricesOfLine(matrix, lines, pos){
     "use strict";
     var x = lines[pos-1][0][0];
@@ -282,107 +280,6 @@ class pathsClass{
         }
         return [];
     }
-}
-
-
-function randomMatrices(model, lines){
-    "use strict";
-    let solutions = Array.newWithElement(1000, []);
-    return solutions
-        .map((value)=>{
-            return  randomMatrix(model, lines);
-        })
-        .filter((matrix)=>{
-            //return true;
-            return validateLines(matrix, lines);
-        });
-}
-
-function randomMatrix(matrix, lines){
-    "use strict";
-    return matrix
-        .map((value, pos)=>{
-           return value
-               .map((value2, pos2)=>{
-                  if(value2==-1)
-                      return value2;
-                  return valuesForPoint(matrix, pos, pos2, lines);
-               });
-        });
-}
-
-function valuesForPoint(matrix, x, y , lines){
-    "use strict";
-    let points = lines
-        .map((line, pos)=>{return {"pos": pos, "line": line};})
-        .filter(line=>inStartEnd(line.line, x, y))
-        .map(line=>line.pos+1);
-    //if there is at leas one start/end no other points
-    if(points.length)
-        return points;
-    points = Array.newWithElement(Math.randBounds(0,lines.length), []);
-    points = points
-        .map(point=>Math.randBounds(1,lines.length))
-        .filter((elem, pos, arr) =>  arr.indexOf(elem) == pos); //uinique
-    if(points.length==0)
-        return 0;
-    return points;
-}
-
-function validateLines(matrix, lines) {
-    "use strict";
-    for(let i = 0; i<lines.length;i++)
-        if(!validateLine(matrix, lines[i], i+1))
-            return false;
-    return true;
-}
-
-function validateLine(matrix, line, name){
-    "use strict";
-    if(!matrix.search(line[0][0],line[0][1],name) || !matrix.search(line[1][0],line[1][1],name))
-        return false;
-
-    for(let valueIndex = 0; valueIndex<matrix.length;valueIndex++){
-        let value = matrix[valueIndex];
-        for(let value2Index = 0; value2Index < value.length; value2Index++) {
-            let value2 = value[value2Index];
-            let count = validPoint(matrix, valueIndex, value2Index, name);
-            let found = matrix.search(valueIndex, value2Index, name);
-            //console.log(valueIndex, value2Index, value2, found, isValidPoint(matrix, valueIndex, value2Index, name),
-            //    (valueIndex == line[0][0] && value2Index == line[0][1]),(valueIndex == line[1][0] && value2Index == line[1][1]));
-            if(found) {
-                //TODO check that end or start has count == 1
-                //end or start
-                if (inStartEnd(line, valueIndex, value2Index)) {
-                    if (count < 1) //this can cause more than one enter point in the start/end
-                        return false;
-                } else if (count <= 1)
-                    return false;
-            }
-        }
-    }
-    return true;
-}
-
-// point with a previous and following point
-function validPoint(matrix, x, y, value){
-    "use strict";
-    let count = 0;
-    if(matrix.search(x-1,y,value))
-        count++;
-    if(matrix.search(x+1,y,value))
-        count++;
-    if(matrix.search(x,y-1,value))
-        count++;
-    if(matrix.search(x,y+1,value))
-        count++;
-    return count;
-}
-
-function inStartEnd(line, x, y){
-    "use strict";
-    return (x == line[0][0] && y == line[0][1])
-        || (x == line[1][0] && y == line[1][1]);
 }
 
 module.exports = bestMatrix;
