@@ -75,7 +75,7 @@ var LENGTH_SCORE = 1;
 var ANGLE_SCORE = 5;
 var OVERLAPPING_SCORE = 30;
 var RIGHT_CONSTRAINT = true; //the arrows cannot come back in the horizontal line (if I start from the right side I can go only to left)
-var ALLOW_TWO_ANGLES = true; //allow to have two near angles, in the case this bring to go to the original direction
+var ALLOW_TWO_ANGLES = false; //allow to have two near angles, in the case this bring to go to the original direction
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
@@ -106,10 +106,10 @@ var matrixDemo3 = [[-1, -1, [1], -1], [-1, -1, [1], -1], [[1], [1], [1, 2], [2]]
 
 //console.log(findMatricesOfLine(complexMatrix, complexLines, 1));
 //console.log(bestMatrix(baseMatrix, lines));
-var t0 = new Date().getTime();
+/*var t0 = new Date().getTime();
 console.log(bestMatrix(complexMatrix, complexLines));
 var t1 = new Date().getTime();
-console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
+console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");*/
 
 function bestMatrix(matrix, lines) {
     "use strict";
