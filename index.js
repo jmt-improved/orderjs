@@ -74,7 +74,7 @@ const ANGLE_SCORE = 5;
 const OVERLAPPING_SCORE = 30;
 const RIGHT_CONSTRAINT = true; //the arrows cannot come back in the horizontal line (if I start from the right side I can go only to left)
 const ALLOW_TWO_ANGLES = false; //allow to have two near angles, in the case this bring to go to the original direction
-const ANGLE_LIMITS = 6;
+const ANGLE_LIMITS = 3; //limits of the number of angle for each line
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
