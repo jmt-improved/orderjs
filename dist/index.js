@@ -267,8 +267,8 @@ var pathsClass = function () {
                     order[1] = 1;
                     order[2] = 3;
                 } else {
-                    order[1] = 1;
-                    order[2] = 3;
+                    order[1] = 3;
+                    order[2] = 1;
                 }
             }
 
