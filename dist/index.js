@@ -247,7 +247,11 @@ var pathsClass = function () {
             //break if I have two parallel lines? without blank?
             if (angleInfo.turned >= 2 && (!ALLOW_TWO_ANGLES || angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)) return [];
 
-            //TODO break if right and the limit was passed
+            //break if right and the limit was passed
+            if (RIGHT_CONSTRAINT) {
+                if (this.right && y > this.line[1][1]) return [];
+                if (!this.right && y < this.line[1][1]) return [];
+            }
 
             var order = [1, 2, 3, 4];
             if (ORDER_LOGIC) {
