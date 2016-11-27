@@ -88,6 +88,7 @@ var ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation
 * ALLOW_TWO_ANGLES = false;
 * ORDER_LOGIC = true;
  */
+var counter = 0;
 
 function bestMatrix(matrix, lines) {
     "use strict";
@@ -99,11 +100,12 @@ function allMatrices(matrix, lines) {
     "use strict";
 
     var t0 = new Date().getTime();
+    counter = 0;
     var matrices = lines.map(function (line, pos) {
         return findMatricesOfLine(matrix, lines, pos + 1);
     });
     var t1 = new Date().getTime();
-    console.log("Phase1 (generation data) " + (t1 - t0) + " milliseconds.");
+    console.log("Phase1 (generation data) " + (t1 - t0) + " milliseconds.", counter);
 
     //filtering
     t0 = new Date().getTime();
@@ -271,6 +273,7 @@ var pathsClass = function () {
                     order[2] = 1;
                 }
             }
+            counter++;
 
             for (var i = 0; i <= 3; i++) {
                 matrices = matrices.concat(this.nextStep(matrix, x, y, level, angleInfo, order[i]));
