@@ -103,10 +103,23 @@ function allMatrices(matrix, lines) {
     var t1 = new Date().getTime();
     console.log("Phase1 (generation data) " + (t1 - t0) + " milliseconds.");
 
+    //filtering
+    t0 = new Date().getTime();
+    matrices = matrices.map(function (matrix) {
+        var bestMatrix = matrix.bestPath;
+        return matrix.paths.filter(function (path) {
+            return path.level < bestMatrix * NO_PATHS_GREATER_THAN;
+        }).map(function (path) {
+            return path.path;
+        });
+    });
+    t1 = new Date().getTime();
+    console.log("Phase2 (filtering) " + (t1 - t0) + " milliseconds.");
+
     t0 = new Date().getTime();
     var combination = new combinationClass().getCombinations(matrices).getCombination();
     t1 = new Date().getTime();
-    console.log("Phase2 (combinations & score) " + (t1 - t0) + " milliseconds.");
+    console.log("Phase3 (combinations & score) " + (t1 - t0) + " milliseconds.");
     return combination;
 }
 
@@ -167,7 +180,8 @@ function findMatricesOfLine(matrix, lines, pos) {
     var y = lines[pos - 1][0][1];
     matrix = matrix.clone();
     matrix[x][y] = [pos];
-    return new paths().allPaths(matrix, lines[pos - 1], x, y, pos, 0, lines[pos - 1][0][1] < lines[pos - 1][1][1]);
+    var paths = new pathsClass();
+    return { "paths": paths.allPaths(matrix, lines[pos - 1], x, y, pos, 0, lines[pos - 1][0][1] < lines[pos - 1][1][1]), bestPath: paths.bestPath };
 }
 
 function calculateScore(matrix) {
@@ -197,14 +211,14 @@ function calculateAnglesNumber(matrix, x, y) {
     }).length;
 }
 
-var paths = function () {
-    function paths() {
-        _classCallCheck(this, paths);
+var pathsClass = function () {
+    function pathsClass() {
+        _classCallCheck(this, pathsClass);
 
         this.bestPath = 1000000;
     }
 
-    _createClass(paths, [{
+    _createClass(pathsClass, [{
         key: "allPaths",
         value: function allPaths(matrix, line, x, y, value, level, right, angleInfo) {
             "use strict";
@@ -216,7 +230,7 @@ var paths = function () {
             if (x == line[1][0] && y == line[1][1]) {
                 if (level < this.bestPath) this.bestPath = level;
 
-                return [matrix];
+                return [{ "level": level, "path": matrix }];
             }
 
             if (angleInfo.turned) angleInfo.turnedCounter++;
@@ -286,7 +300,7 @@ var paths = function () {
         }
     }]);
 
-    return paths;
+    return pathsClass;
 }();
 
 function randomMatrices(model, lines) {

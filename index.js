@@ -97,10 +97,22 @@ function allMatrices(matrix, lines){
     var t1 = new Date().getTime();
     console.log("Phase1 (generation data) " + (t1 - t0) + " milliseconds.");
 
+    //filtering
+    t0 = new Date().getTime();
+    matrices = matrices.map((matrix)=>{
+        let bestMatrix = matrix.bestPath;
+        return matrix.paths
+            .filter(path=>path.level<bestMatrix*NO_PATHS_GREATER_THAN)
+            .map(path=>path.path);
+    });
+    t1 = new Date().getTime();
+    console.log("Phase2 (filtering) " + (t1 - t0) + " milliseconds.");
+
+
     t0 = new Date().getTime();
     let combination = (new combinationClass()).getCombinations(matrices).getCombination();
     t1 = new Date().getTime();
-    console.log("Phase2 (combinations & score) " + (t1 - t0) + " milliseconds.");
+    console.log("Phase3 (combinations & score) " + (t1 - t0) + " milliseconds.");
     return combination;
 }
 
@@ -152,7 +164,8 @@ function findMatricesOfLine(matrix, lines, pos){
     var y = lines[pos-1][0][1];
     matrix = matrix.clone();
     matrix[x][y] = [pos];
-    return (new paths()).allPaths(matrix, lines[pos-1], x,y, pos, 0, lines[pos-1][0][1]<lines[pos-1][1][1]);
+    var paths = new pathsClass();
+    return {"paths": paths.allPaths(matrix, lines[pos-1], x,y, pos, 0, lines[pos-1][0][1]<lines[pos-1][1][1]), bestPath: paths.bestPath};
 }
 
 
@@ -186,7 +199,7 @@ function calculateAnglesNumber(matrix, x, y){
     }).length;
 }
 
-class paths{
+class pathsClass{
     constructor() {
         this.bestPath = 1000000;
     }
@@ -201,7 +214,7 @@ class paths{
             if(level<this.bestPath)
                 this.bestPath = level;
 
-            return [matrix];
+            return [{"level": level, "path":matrix}];
         }
 
         if(angleInfo.turned)
