@@ -88,14 +88,17 @@ function bestMatrix(matrix, lines){
     "use strict";
     let score = 1000000;
     let ret = [];
-    allMatrices(matrix, lines)
-        .forEach((value)=>{
-            let tmpScore = calculateScore(value);
-            if(tmpScore<score){
-                score = tmpScore;
-                ret = value;
-            }
-        });
+    let matrices = allMatrices(matrix, lines);
+    var t0 = new Date().getTime();
+    matrices.forEach((value)=>{
+        let tmpScore = calculateScore(value);
+        if(tmpScore<score){
+            score = tmpScore;
+            ret = value;
+        }
+    });
+    var t1 = new Date().getTime();
+    console.log("Phase3 (scoring) " + (t1 - t0) + " milliseconds.");
     console.log(score);
     return ret;
 }
@@ -103,8 +106,15 @@ function bestMatrix(matrix, lines){
 
 function allMatrices(matrix, lines){
     "use strict";
+    var t0 = new Date().getTime();
     let matrices = lines.map((line,pos)=>findMatricesOfLine(matrix,lines,pos+1));
+    var t1 = new Date().getTime();
+    console.log("Phase1 (generation data) " + (t1 - t0) + " milliseconds.");
+
+    t0 = new Date().getTime();
     let combinations = getCombinations(matrices);
+    t1 = new Date().getTime();
+    console.log("Phase2 (combinations) " + (t1 - t0) + " milliseconds.");
     return combinations;
 }
 
@@ -185,6 +195,7 @@ class paths{
         if(x == line[1][0] && y == line[1][1]) {
             if(level<this.bestPath)
                 this.bestPath = level;
+
             return [matrix];
         }
 
