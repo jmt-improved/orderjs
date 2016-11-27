@@ -76,6 +76,7 @@ var ANGLE_SCORE = 5;
 var OVERLAPPING_SCORE = 30;
 var RIGHT_CONSTRAINT = true; //the arrows cannot come back in the horizontal line (if I start from the right side I can go only to left)
 var ALLOW_TWO_ANGLES = false; //allow to have two near angles, in the case this bring to go to the original direction
+var ANGLE_LIMITS = 6;
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
@@ -202,9 +203,13 @@ function allPaths(matrix, line, x, y, value, level, right, angleInfo) {
     //level = level || 0;
 
     var matrices = [];
-    angleInfo = angleInfo || { direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0 };
+    angleInfo = angleInfo || { direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0 };
 
     if (x == line[1][0] && y == line[1][1]) return [matrix];
+
+    if (angleInfo.turned) angleInfo.turnedCounter++;
+
+    if (angleInfo.turnedCounter > ANGLE_LIMITS) return [];
 
     //break if I have two parallel lines? without blank?
     if (angleInfo.turned >= 2 && (!ALLOW_TWO_ANGLES || angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)) return [];
