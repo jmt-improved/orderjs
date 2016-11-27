@@ -90,21 +90,7 @@ var NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find un
 function bestMatrix(matrix, lines) {
     "use strict";
 
-    var score = 1000000;
-    var ret = [];
-    var matrices = allMatrices(matrix, lines);
-    var t0 = new Date().getTime();
-    matrices.forEach(function (value) {
-        var tmpScore = calculateScore(value);
-        if (tmpScore < score) {
-            score = tmpScore;
-            ret = value;
-        }
-    });
-    var t1 = new Date().getTime();
-    console.log("Phase3 (scoring) " + (t1 - t0) + " milliseconds.");
-    console.log(score);
-    return ret;
+    return allMatrices(matrix, lines);
 }
 
 function allMatrices(matrix, lines) {
@@ -118,34 +104,61 @@ function allMatrices(matrix, lines) {
     console.log("Phase1 (generation data) " + (t1 - t0) + " milliseconds.");
 
     t0 = new Date().getTime();
-    var combinations = getCombinations(matrices);
+    var combination = new combinationClass().getCombinations(matrices).getCombination();
     t1 = new Date().getTime();
-    console.log("Phase2 (combinations) " + (t1 - t0) + " milliseconds.");
-    return combinations;
+    console.log("Phase2 (combinations & score) " + (t1 - t0) + " milliseconds.");
+    return combination;
 }
 
-function getCombinations(matrices, choosen, level) {
-    "use strict";
+var combinationClass = function () {
+    function combinationClass() {
+        _classCallCheck(this, combinationClass);
 
-    level = level || 0;
-    var combinations = [];
-    choosen = choosen || Array.newWithElement(matrices.length, -1);
-    var firstElement = 0;
-    for (; choosen[firstElement] != -1 && firstElement < choosen.length; firstElement++) {}
-    //console.log(level, firstElement, choosen);
-    if (firstElement == choosen.length && choosen[firstElement] != -1) {
-        return [choosen.reduce(function (a, b, pos) {
-            return a.mergeMatrix(matrices[pos][b]);
-        }, matrices[choosen.length - 1][choosen.pop()])]; //remove last
+        this.bestCombination = [];
+        this.score = 1000000;
     }
 
-    matrices[firstElement].forEach(function (value, pos) {
-        var tmpChosen = choosen.clone();
-        tmpChosen[firstElement] = pos;
-        combinations = combinations.concat(getCombinations(matrices, tmpChosen, level + 1));
-    });
-    return combinations;
-}
+    _createClass(combinationClass, [{
+        key: "getCombinations",
+        value: function getCombinations(matrices, choosen, level) {
+            "use strict";
+
+            var _this = this;
+
+            level = level || 0;
+            choosen = choosen || Array.newWithElement(matrices.length, -1);
+            var firstElement = 0;
+            for (; choosen[firstElement] != -1 && firstElement < choosen.length; firstElement++) {}
+            //console.log(level, firstElement, choosen);
+            if (firstElement == choosen.length && choosen[firstElement] != -1) {
+                var merged = choosen.reduce(function (a, b, pos) {
+                    return a.mergeMatrix(matrices[pos][b]);
+                }, matrices[choosen.length - 1][choosen.pop()]); //remove last
+                var score = calculateScore(merged);
+                if (score < this.score) {
+                    this.score = score;
+                    this.bestCombination = merged;
+                }
+                return this;
+            }
+
+            matrices[firstElement].forEach(function (value, pos) {
+                var tmpChosen = choosen.clone();
+                tmpChosen[firstElement] = pos;
+                _this.getCombinations(matrices, tmpChosen, level + 1);
+            });
+            return this;
+        }
+    }, {
+        key: "getCombination",
+        value: function getCombination() {
+            console.log(this.score);
+            return this.bestCombination;
+        }
+    }]);
+
+    return combinationClass;
+}();
 
 function findMatricesOfLine(matrix, lines, pos) {
     "use strict";

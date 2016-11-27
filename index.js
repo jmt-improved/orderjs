@@ -86,21 +86,7 @@ const NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find 
 
 function bestMatrix(matrix, lines){
     "use strict";
-    let score = 1000000;
-    let ret = [];
-    let matrices = allMatrices(matrix, lines);
-    var t0 = new Date().getTime();
-    matrices.forEach((value)=>{
-        let tmpScore = calculateScore(value);
-        if(tmpScore<score){
-            score = tmpScore;
-            ret = value;
-        }
-    });
-    var t1 = new Date().getTime();
-    console.log("Phase3 (scoring) " + (t1 - t0) + " milliseconds.");
-    console.log(score);
-    return ret;
+    return allMatrices(matrix, lines);
 }
 
 
@@ -112,32 +98,51 @@ function allMatrices(matrix, lines){
     console.log("Phase1 (generation data) " + (t1 - t0) + " milliseconds.");
 
     t0 = new Date().getTime();
-    let combinations = getCombinations(matrices);
+    let combination = (new combinationClass()).getCombinations(matrices).getCombination();
     t1 = new Date().getTime();
-    console.log("Phase2 (combinations) " + (t1 - t0) + " milliseconds.");
-    return combinations;
+    console.log("Phase2 (combinations & score) " + (t1 - t0) + " milliseconds.");
+    return combination;
 }
 
-function getCombinations(matrices, choosen, level){
-    "use strict";
-    level = level || 0;
-    let combinations = [];
-    choosen = choosen || Array.newWithElement(matrices.length, -1);
-    let firstElement = 0;
-    for(;choosen[firstElement]!=-1 && firstElement<choosen.length;firstElement++);
-    //console.log(level, firstElement, choosen);
-    if(firstElement==choosen.length && choosen[firstElement]!=-1) {
-        return [choosen.reduce((a, b, pos)=>a.mergeMatrix(matrices[pos][b]), matrices[choosen.length-1][choosen.pop()])]; //remove last
+class combinationClass{
+
+    constructor() {
+        this.bestCombination = [];
+        this.score = 1000000;
     }
 
-    matrices[firstElement]
-        .forEach((value, pos)=>{
-            let tmpChosen = choosen.clone();
-            tmpChosen[firstElement] = pos;
-            combinations = combinations.concat(getCombinations(matrices, tmpChosen, level+1));
-        });
-    return combinations;
+    getCombinations(matrices, choosen, level){
+        "use strict";
+        level = level || 0;
+        choosen = choosen || Array.newWithElement(matrices.length, -1);
+        let firstElement = 0;
+        for(;choosen[firstElement]!=-1 && firstElement<choosen.length;firstElement++);
+        //console.log(level, firstElement, choosen);
+        if(firstElement==choosen.length && choosen[firstElement]!=-1) {
+            let merged = choosen.reduce((a, b, pos)=>a.mergeMatrix(matrices[pos][b]), matrices[choosen.length-1][choosen.pop()]); //remove last
+            let score = calculateScore(merged);
+            if(score<this.score){
+                this.score = score;
+                this.bestCombination = merged;
+            }
+            return this;
+        }
+
+        matrices[firstElement]
+            .forEach((value, pos)=>{
+                let tmpChosen = choosen.clone();
+                tmpChosen[firstElement] = pos;
+                this.getCombinations(matrices, tmpChosen, level+1);
+            });
+        return this;
+    }
+
+    getCombination(){
+        console.log(this.score);
+        return this.bestCombination;
+    }
 }
+
 
 
 
