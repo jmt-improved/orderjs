@@ -1,8 +1,11 @@
-"use strict";
-
 /**
  * Created by claudio on 26/11/16.
  */
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 Array.prototype.isValidPoint = function (x, y) {
     "use strict";
@@ -76,41 +79,13 @@ var ANGLE_SCORE = 5;
 var OVERLAPPING_SCORE = 30;
 var RIGHT_CONSTRAINT = true; //the arrows cannot come back in the horizontal line (if I start from the right side I can go only to left)
 var ALLOW_TWO_ANGLES = false; //allow to have two near angles, in the case this bring to go to the original direction
-var ANGLE_LIMITS = 6;
+var ANGLE_LIMITS = 3; //limits of the number of angle for each line
+var NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
 * ALLOW_TWO_ANGLES = false;
  */
-
-var baseMatrix = [[-1, -1, 0, -1], [-1, -1, 0, -1], [0, 0, 0, 0], [0, 0, 0, 0]];
-
-var lines = [[[0, 2], [2, 0]], [[2, 3], [3, 0]]];
-
-var oneLine = [[[0, 2], [2, 0]]];
-
-var complexMatrix = [[-1, -1, 0, -1, 0, 0, 0], [-1, -1, 0, -1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]];
-
-var complexLines = [[[0, 4], [6, 0]], [[2, 3], [3, 0]]];
-
-/*complexLines = [
-    [[6,6],[0,4]],
-    [[2,3],[3,0]]
-];*/
-
-var matrixDemo = [[-1, -1, [1], -1], [-1, -1, [1], -1], [[1], [1], [1], [2]], [[2], [2], [2], [2]]];
-
-var matrixDemo2 = [[-1, -1, [1], -1], [-1, -1, [1], -1], [[1], [1], [1, 2], [2]], [[2], [2], [2], 0]];
-
-var matrixDemo3 = [[-1, -1, [1], -1], [-1, -1, [1], -1], [[1], [1], [1, 2], [2]], [[2], [2], [2], [2]]]; //TODO in that case one more angle is counted for 2 because we don't know the "start", maybe we should enumerate the point of a line
-
-
-//console.log(findMatricesOfLine(complexMatrix, complexLines, 1));
-//console.log(bestMatrix(baseMatrix, lines));
-/*var t0 = new Date().getTime();
-console.log(bestMatrix(complexMatrix, complexLines));
-var t1 = new Date().getTime();
-console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");*/
 
 function bestMatrix(matrix, lines) {
     "use strict";
@@ -168,7 +143,7 @@ function findMatricesOfLine(matrix, lines, pos) {
     var y = lines[pos - 1][0][1];
     matrix = matrix.clone();
     matrix[x][y] = [pos];
-    return allPaths(matrix, lines[pos - 1], x, y, pos, 0, lines[pos - 1][0][1] < lines[pos - 1][1][1]);
+    return new paths().allPaths(matrix, lines[pos - 1], x, y, pos, 0, lines[pos - 1][0][1] < lines[pos - 1][1][1]);
 }
 
 function calculateScore(matrix) {
@@ -198,78 +173,96 @@ function calculateAnglesNumber(matrix, x, y) {
     }).length;
 }
 
-function allPaths(matrix, line, x, y, value, level, right, angleInfo) {
-    "use strict";
-    //level = level || 0;
+var paths = function () {
+    function paths() {
+        _classCallCheck(this, paths);
 
-    var matrices = [];
-    angleInfo = angleInfo || { direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0 };
+        this.bestPath = 1000000;
+    }
 
-    if (x == line[1][0] && y == line[1][1]) return [matrix];
+    _createClass(paths, [{
+        key: "allPaths",
+        value: function allPaths(matrix, line, x, y, value, level, right, angleInfo) {
+            "use strict";
+            //level = level || 0;
 
-    if (angleInfo.turned) angleInfo.turnedCounter++;
+            var matrices = [];
+            angleInfo = angleInfo || { direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0 };
 
-    if (angleInfo.turnedCounter > ANGLE_LIMITS) return [];
+            if (x == line[1][0] && y == line[1][1]) {
+                if (level < this.bestPath) this.bestPath = level;
+                return [matrix];
+            }
 
-    //break if I have two parallel lines? without blank?
-    if (angleInfo.turned >= 2 && (!ALLOW_TWO_ANGLES || angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)) return [];
+            if (angleInfo.turned) angleInfo.turnedCounter++;
 
-    //recursion
-    var end = false;
+            if (angleInfo.turnedCounter > ANGLE_LIMITS) return [];
 
-    if (matrix.isValidPoint(x + 1, y) && matrix[x + 1][y] == 0) {
-        var tmpMatrix = matrix.clone();
-        tmpMatrix[x + 1][y] = [value];
-        var tmpAngleInfo = angleInfo.clone();
-        tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
-        tmpAngleInfo.previousDirection = tmpAngleInfo.direction;
-        tmpAngleInfo.direction = 1;
-        if (tmpAngleInfo.direction != angleInfo.direction) tmpAngleInfo.turned++;else tmpAngleInfo.turned = 0;
-        var tmp = allPaths(tmpMatrix, line, x + 1, y, value, level + 1, right, tmpAngleInfo);
-        matrices = matrices.concat(tmp);
-    } else end = true;
+            if (level > angleInfo.bestPath * NO_PATHS_GREATER_THAN) return [];
 
-    if (right || !RIGHT_CONSTRAINT) if (matrix.isValidPoint(x, y + 1) && matrix[x][y + 1] == 0) {
-        var _tmpMatrix = matrix.clone();
-        _tmpMatrix[x][y + 1] = [value];
-        var _tmpAngleInfo = angleInfo.clone();
-        _tmpAngleInfo.previousPreviousDirection = _tmpAngleInfo.previousDirection;
-        _tmpAngleInfo.previousDirection = _tmpAngleInfo.direction;
-        _tmpAngleInfo.direction = 2;
-        if (_tmpAngleInfo.direction != angleInfo.direction) _tmpAngleInfo.turned++;else _tmpAngleInfo.turned = 0;
-        var _tmp = allPaths(_tmpMatrix, line, x, y + 1, value, level + 1, right, _tmpAngleInfo);
-        matrices = matrices.concat(_tmp);
-    } else end = true;
+            //break if I have two parallel lines? without blank?
+            if (angleInfo.turned >= 2 && (!ALLOW_TWO_ANGLES || angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)) return [];
 
-    if (matrix.isValidPoint(x - 1, y) && matrix[x - 1][y] == 0) {
-        var _tmpMatrix2 = matrix.clone();
-        _tmpMatrix2[x - 1][y] = [value]; //[value+' '+level];
-        var _tmpAngleInfo2 = angleInfo.clone();
-        _tmpAngleInfo2.previousPreviousDirection = _tmpAngleInfo2.previousDirection;
-        _tmpAngleInfo2.previousDirection = _tmpAngleInfo2.direction;
-        _tmpAngleInfo2.direction = 3;
-        if (_tmpAngleInfo2.direction != angleInfo.direction) _tmpAngleInfo2.turned++;else _tmpAngleInfo2.turned = 0;
-        var _tmp2 = allPaths(_tmpMatrix2, line, x - 1, y, value, level + 1, right, _tmpAngleInfo2);
-        matrices = matrices.concat(_tmp2);
-    } else end = true;
+            //recursion
+            var end = false;
 
-    if (!right || !RIGHT_CONSTRAINT) if (matrix.isValidPoint(x, y - 1) && matrix[x][y - 1] == 0) {
-        var _tmpMatrix3 = matrix.clone();
-        _tmpMatrix3[x][y - 1] = [value];
-        var _tmpAngleInfo3 = angleInfo.clone();
-        _tmpAngleInfo3.previousPreviousDirection = _tmpAngleInfo3.previousDirection;
-        _tmpAngleInfo3.previousDirection = _tmpAngleInfo3.direction;
-        _tmpAngleInfo3.direction = 4;
-        if (_tmpAngleInfo3.direction != angleInfo.direction) _tmpAngleInfo3.turned++;else _tmpAngleInfo3.turned = 0;
-        var _tmp3 = allPaths(_tmpMatrix3, line, x, y - 1, value, level + 1, right, _tmpAngleInfo3);
-        matrices = matrices.concat(_tmp3);
-    } else end = true;
+            if (matrix.isValidPoint(x + 1, y) && matrix[x + 1][y] == 0) {
+                var tmpMatrix = matrix.clone();
+                tmpMatrix[x + 1][y] = [value];
+                var tmpAngleInfo = angleInfo.clone();
+                tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
+                tmpAngleInfo.previousDirection = tmpAngleInfo.direction;
+                tmpAngleInfo.direction = 1;
+                if (tmpAngleInfo.direction != angleInfo.direction) tmpAngleInfo.turned++;else tmpAngleInfo.turned = 0;
+                var tmp = this.allPaths(tmpMatrix, line, x + 1, y, value, level + 1, right, tmpAngleInfo);
+                matrices = matrices.concat(tmp);
+            } else end = true;
 
-    /*if(end && validateLine(matrix, line[value-1], value))
-        matrices.push(matrix);*/
+            if (right || !RIGHT_CONSTRAINT) if (matrix.isValidPoint(x, y + 1) && matrix[x][y + 1] == 0) {
+                var _tmpMatrix = matrix.clone();
+                _tmpMatrix[x][y + 1] = [value];
+                var _tmpAngleInfo = angleInfo.clone();
+                _tmpAngleInfo.previousPreviousDirection = _tmpAngleInfo.previousDirection;
+                _tmpAngleInfo.previousDirection = _tmpAngleInfo.direction;
+                _tmpAngleInfo.direction = 2;
+                if (_tmpAngleInfo.direction != angleInfo.direction) _tmpAngleInfo.turned++;else _tmpAngleInfo.turned = 0;
+                var _tmp = this.allPaths(_tmpMatrix, line, x, y + 1, value, level + 1, right, _tmpAngleInfo);
+                matrices = matrices.concat(_tmp);
+            } else end = true;
 
-    return matrices;
-}
+            if (matrix.isValidPoint(x - 1, y) && matrix[x - 1][y] == 0) {
+                var _tmpMatrix2 = matrix.clone();
+                _tmpMatrix2[x - 1][y] = [value]; //[value+' '+level];
+                var _tmpAngleInfo2 = angleInfo.clone();
+                _tmpAngleInfo2.previousPreviousDirection = _tmpAngleInfo2.previousDirection;
+                _tmpAngleInfo2.previousDirection = _tmpAngleInfo2.direction;
+                _tmpAngleInfo2.direction = 3;
+                if (_tmpAngleInfo2.direction != angleInfo.direction) _tmpAngleInfo2.turned++;else _tmpAngleInfo2.turned = 0;
+                var _tmp2 = this.allPaths(_tmpMatrix2, line, x - 1, y, value, level + 1, right, _tmpAngleInfo2);
+                matrices = matrices.concat(_tmp2);
+            } else end = true;
+
+            if (!right || !RIGHT_CONSTRAINT) if (matrix.isValidPoint(x, y - 1) && matrix[x][y - 1] == 0) {
+                var _tmpMatrix3 = matrix.clone();
+                _tmpMatrix3[x][y - 1] = [value];
+                var _tmpAngleInfo3 = angleInfo.clone();
+                _tmpAngleInfo3.previousPreviousDirection = _tmpAngleInfo3.previousDirection;
+                _tmpAngleInfo3.previousDirection = _tmpAngleInfo3.direction;
+                _tmpAngleInfo3.direction = 4;
+                if (_tmpAngleInfo3.direction != angleInfo.direction) _tmpAngleInfo3.turned++;else _tmpAngleInfo3.turned = 0;
+                var _tmp3 = this.allPaths(_tmpMatrix3, line, x, y - 1, value, level + 1, right, _tmpAngleInfo3);
+                matrices = matrices.concat(_tmp3);
+            } else end = true;
+
+            /*if(end && validateLine(matrix, line[value-1], value))
+             matrices.push(matrix);*/
+
+            return matrices;
+        }
+    }]);
+
+    return paths;
+}();
 
 function randomMatrices(model, lines) {
     "use strict";
@@ -367,3 +360,5 @@ function inStartEnd(line, x, y) {
 
     return x == line[0][0] && y == line[0][1] || x == line[1][0] && y == line[1][1];
 }
+
+module.exports = bestMatrix;
