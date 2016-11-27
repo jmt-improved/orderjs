@@ -81,10 +81,12 @@ var RIGHT_CONSTRAINT = true; //the arrows cannot come back in the horizontal lin
 var ALLOW_TWO_ANGLES = false; //allow to have two near angles, in the case this bring to go to the original direction
 var ANGLE_LIMITS = 3; //limits of the number of angle for each line
 var NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
+var ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation algohorithm
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
 * ALLOW_TWO_ANGLES = false;
+* ORDER_LOGIC = true;
  */
 
 function bestMatrix(matrix, lines) {
@@ -245,11 +247,29 @@ var pathsClass = function () {
             //break if I have two parallel lines? without blank?
             if (angleInfo.turned >= 2 && (!ALLOW_TWO_ANGLES || angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)) return [];
 
-            //recursion
-            var end = false;
+            //TODO break if right and the limit was passed
 
-            for (var i = 1; i <= 4; i++) {
-                matrices = matrices.concat(this.nextStep(matrix, x, y, level, angleInfo, i));
+            var order = [1, 2, 3, 4];
+            if (ORDER_LOGIC) {
+                //TODO improve if equal do the vertical actions
+                if (y < this.line[1][1]) {
+                    order[0] = 2;
+                    order[3] = 4;
+                } else {
+                    order[0] = 4;
+                    order[3] = 2;
+                }
+                if (x < this.line[1][0]) {
+                    order[1] = 1;
+                    order[2] = 3;
+                } else {
+                    order[1] = 1;
+                    order[2] = 3;
+                }
+            }
+
+            for (var i = 0; i <= 3; i++) {
+                matrices = matrices.concat(this.nextStep(matrix, x, y, level, angleInfo, order[i]));
             }return matrices;
         }
     }, {
@@ -271,7 +291,7 @@ var pathsClass = function () {
                     y -= 1;
                     break;
             }
-            //console.log('called,', matrix);
+
             if (direction == 2 && !(this.right || !RIGHT_CONSTRAINT)) return [];
 
             if (direction == 4 && !(!this.right || !RIGHT_CONSTRAINT)) return [];

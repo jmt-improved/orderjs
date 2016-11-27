@@ -76,10 +76,12 @@ const RIGHT_CONSTRAINT = true; //the arrows cannot come back in the horizontal l
 const ALLOW_TWO_ANGLES = false; //allow to have two near angles, in the case this bring to go to the original direction
 const ANGLE_LIMITS = 3; //limits of the number of angle for each line
 const NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
+const ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation algohorithm
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
 * ALLOW_TWO_ANGLES = false;
+* ORDER_LOGIC = true;
  */
 
 
@@ -211,7 +213,7 @@ class pathsClass{
         level = level || 0;
         angleInfo = angleInfo || {direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0};
 
-        if(x == this.line[1][0] && y ==this.line[1][1]) {
+        if(x == this.line[1][0] && y == this.line[1][1]) {
             if(level<this.bestPath)
                 this.bestPath = level;
 
@@ -227,17 +229,33 @@ class pathsClass{
         if(level>angleInfo.bestPath*NO_PATHS_GREATER_THAN)
             return [];
 
-
         //break if I have two parallel lines? without blank?
         if(angleInfo.turned>=2 && (!ALLOW_TWO_ANGLES || (angleInfo.direction != angleInfo.previousPreviousDirection && angleInfo.previousPreviousDirection != 0)))
             return [];
 
+        //TODO break if right and the limit was passed
 
-        //recursion
-        var end = false;
+        let order = [1,2,3,4];
+        if(ORDER_LOGIC){
+            //TODO improve if equal do the vertical actions
+            if(y<this.line[1][1]){
+                order[0] = 2;
+                order[3] = 4;
+            }else{
+                order[0] = 4;
+                order[3] = 2;
+            }
+            if(x<this.line[1][0]){
+                order[1] = 1;
+                order[2] = 3;
+            }else{
+                order[1] = 1;
+                order[2] = 3;
+            }
+        }
 
-        for (let i = 1; i <=4; i++)
-            matrices = matrices.concat(this.nextStep(matrix, x, y, level, angleInfo, i));
+        for (let i = 0; i <=3; i++)
+            matrices = matrices.concat(this.nextStep(matrix, x, y, level, angleInfo, order[i]));
 
         return matrices;
     }
@@ -258,7 +276,7 @@ class pathsClass{
                 y -= 1;
                 break;
         }
-        //console.log('called,', matrix);
+
         if(direction == 2 && !(this.right || !RIGHT_CONSTRAINT))
             return [];
 
