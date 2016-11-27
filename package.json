@@ -1,0 +1,27 @@
+{
+  "name": "orderjs",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node_modules/babel-cli/bin/babel.js index.js --out-file dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmt-improved/orderjs.git"
+  },
+  "keywords": [
+    "order"
+  ],
+  "author": "Claudio Cardinale",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/jmt-improved/orderjs/issues"
+  },
+  "homepage": "https://github.com/jmt-improved/orderjs#readme",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-preset-latest": "^6.16.0"
+  }
+}
