@@ -180,8 +180,8 @@ function findMatricesOfLine(matrix, lines, pos) {
     var y = lines[pos - 1][0][1];
     matrix = matrix.clone();
     matrix[x][y] = [pos];
-    var paths = new pathsClass();
-    return { "paths": paths.allPaths(matrix, lines[pos - 1], x, y, pos, 0, lines[pos - 1][0][1] < lines[pos - 1][1][1]), bestPath: paths.bestPath };
+    var paths = new pathsClass(lines[pos - 1], pos, lines[pos - 1][0][1] < lines[pos - 1][1][1]);
+    return { "paths": paths.allPaths(matrix, x, y), bestPath: paths.bestPath };
 }
 
 function calculateScore(matrix) {
@@ -212,22 +212,25 @@ function calculateAnglesNumber(matrix, x, y) {
 }
 
 var pathsClass = function () {
-    function pathsClass() {
+    function pathsClass(line, value, right) {
         _classCallCheck(this, pathsClass);
 
         this.bestPath = 1000000;
+        this.line = line;
+        this.value = value;
+        this.right = right;
     }
 
     _createClass(pathsClass, [{
         key: "allPaths",
-        value: function allPaths(matrix, line, x, y, value, level, right, angleInfo) {
+        value: function allPaths(matrix, x, y, level, angleInfo) {
             "use strict";
-            //level = level || 0;
 
             var matrices = [];
+            level = level || 0;
             angleInfo = angleInfo || { direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0 };
 
-            if (x == line[1][0] && y == line[1][1]) {
+            if (x == this.line[1][0] && y == this.line[1][1]) {
                 if (level < this.bestPath) this.bestPath = level;
 
                 return [{ "level": level, "path": matrix }];
@@ -245,58 +248,45 @@ var pathsClass = function () {
             //recursion
             var end = false;
 
-            if (matrix.isValidPoint(x + 1, y) && matrix[x + 1][y] == 0) {
+            for (var i = 1; i <= 4; i++) {
+                matrices = matrices.concat(this.nextStep(matrix, x, y, level, angleInfo, i));
+            }return matrices;
+        }
+    }, {
+        key: "nextStep",
+        value: function nextStep(matrix, x, y, level, angleInfo, direction) {
+            "use strict";
+
+            switch (direction) {
+                case 1:
+                    x += 1;
+                    break;
+                case 2:
+                    y += 1;
+                    break;
+                case 3:
+                    x -= 1;
+                    break;
+                case 4:
+                    y -= 1;
+                    break;
+            }
+            //console.log('called,', matrix);
+            if (direction == 2 && !(this.right || !RIGHT_CONSTRAINT)) return [];
+
+            if (direction == 4 && !(!this.right || !RIGHT_CONSTRAINT)) return [];
+
+            if (matrix.isValidPoint(x, y) && matrix[x][y] == 0) {
                 var tmpMatrix = matrix.clone();
-                tmpMatrix[x + 1][y] = [value];
+                tmpMatrix[x][y] = [this.value];
                 var tmpAngleInfo = angleInfo.clone();
                 tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
                 tmpAngleInfo.previousDirection = tmpAngleInfo.direction;
-                tmpAngleInfo.direction = 1;
+                tmpAngleInfo.direction = direction;
                 if (tmpAngleInfo.direction != angleInfo.direction) tmpAngleInfo.turned++;else tmpAngleInfo.turned = 0;
-                var tmp = this.allPaths(tmpMatrix, line, x + 1, y, value, level + 1, right, tmpAngleInfo);
-                matrices = matrices.concat(tmp);
-            } else end = true;
-
-            if (right || !RIGHT_CONSTRAINT) if (matrix.isValidPoint(x, y + 1) && matrix[x][y + 1] == 0) {
-                var _tmpMatrix = matrix.clone();
-                _tmpMatrix[x][y + 1] = [value];
-                var _tmpAngleInfo = angleInfo.clone();
-                _tmpAngleInfo.previousPreviousDirection = _tmpAngleInfo.previousDirection;
-                _tmpAngleInfo.previousDirection = _tmpAngleInfo.direction;
-                _tmpAngleInfo.direction = 2;
-                if (_tmpAngleInfo.direction != angleInfo.direction) _tmpAngleInfo.turned++;else _tmpAngleInfo.turned = 0;
-                var _tmp = this.allPaths(_tmpMatrix, line, x, y + 1, value, level + 1, right, _tmpAngleInfo);
-                matrices = matrices.concat(_tmp);
-            } else end = true;
-
-            if (matrix.isValidPoint(x - 1, y) && matrix[x - 1][y] == 0) {
-                var _tmpMatrix2 = matrix.clone();
-                _tmpMatrix2[x - 1][y] = [value]; //[value+' '+level];
-                var _tmpAngleInfo2 = angleInfo.clone();
-                _tmpAngleInfo2.previousPreviousDirection = _tmpAngleInfo2.previousDirection;
-                _tmpAngleInfo2.previousDirection = _tmpAngleInfo2.direction;
-                _tmpAngleInfo2.direction = 3;
-                if (_tmpAngleInfo2.direction != angleInfo.direction) _tmpAngleInfo2.turned++;else _tmpAngleInfo2.turned = 0;
-                var _tmp2 = this.allPaths(_tmpMatrix2, line, x - 1, y, value, level + 1, right, _tmpAngleInfo2);
-                matrices = matrices.concat(_tmp2);
-            } else end = true;
-
-            if (!right || !RIGHT_CONSTRAINT) if (matrix.isValidPoint(x, y - 1) && matrix[x][y - 1] == 0) {
-                var _tmpMatrix3 = matrix.clone();
-                _tmpMatrix3[x][y - 1] = [value];
-                var _tmpAngleInfo3 = angleInfo.clone();
-                _tmpAngleInfo3.previousPreviousDirection = _tmpAngleInfo3.previousDirection;
-                _tmpAngleInfo3.previousDirection = _tmpAngleInfo3.direction;
-                _tmpAngleInfo3.direction = 4;
-                if (_tmpAngleInfo3.direction != angleInfo.direction) _tmpAngleInfo3.turned++;else _tmpAngleInfo3.turned = 0;
-                var _tmp3 = this.allPaths(_tmpMatrix3, line, x, y - 1, value, level + 1, right, _tmpAngleInfo3);
-                matrices = matrices.concat(_tmp3);
-            } else end = true;
-
-            /*if(end && validateLine(matrix, line[value-1], value))
-             matrices.push(matrix);*/
-
-            return matrices;
+                return this.allPaths(tmpMatrix, x, y, level + 1, tmpAngleInfo);
+            }
+            return [];
         }
     }]);
 
