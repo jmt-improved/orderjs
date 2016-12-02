@@ -268,9 +268,8 @@ var pathsClass = function () {
             }
 
             //break if I cannot reach the  target and I have not angles available
-            //TODO ...
-            /*if(angleInfo.turnedCounter==ANGLE_LIMITS && (false))
-                return [];*/
+            //TODO improve with higher and lower checks
+            if (angleInfo.turnedCounter == ANGLE_LIMITS && ((angleInfo.direction == 1 || angleInfo.direction == 3) && Math.abs(y - this.line[1][1]) > 1 || (angleInfo.direction == 2 || angleInfo.direction == 4) && Math.abs(x - this.line[1][0])) > 1) return [];
 
             var order = [1, 2, 3, 4];
             //TODO check this... do this only at the beginning?
@@ -357,6 +356,8 @@ if (typeof window != 'undefined' && window) myTimeOut = window.setTimeout;else m
 myTimeOut(function () {
     console.log('Version:', version);
 }, 1000);
+
+version++;
 
 version++;
 
