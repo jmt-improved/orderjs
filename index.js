@@ -318,3 +318,10 @@ class pathsClass{
 }
 
 module.exports = bestMatrix;
+
+var version = 0;
+window.setTimeout(()=>{
+    console.log('Version:', version);
+},1000);
+version++;
+
