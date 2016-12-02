@@ -103,6 +103,7 @@ function allMatrices(matrix, lines){
     console.log("Phase1 (generation data) " + (t1 - t0) + " milliseconds.", counter);
 
     //filtering
+    //TODO maybe this is uselles sicne there are other checks like ORDER_LOGIC(?)
     t0 = new Date().getTime();
     let lengthBefore = 0;
     let lengthAfter = 0;
@@ -239,7 +240,7 @@ class pathsClass{
         if(angleInfo.turnedCounter>ANGLE_LIMITS)
             return [];
 
-        if(level>angleInfo.bestPath*NO_PATHS_GREATER_THAN)
+        if((level+Math.abs(x-this.line[1][0])+Math.abs(y-this.line[1][1]))>(this.bestPath*NO_PATHS_GREATER_THAN))
             return [];
 
         //break if I have two parallel lines? without blank?
@@ -258,6 +259,7 @@ class pathsClass{
         //TODO ...
         /*if(angleInfo.turnedCounter==ANGLE_LIMITS && (false))
             return [];*/
+
 
         let order = [1,2,3,4];
         //TODO check this... do this only at the beginning?
@@ -351,6 +353,10 @@ if(typeof window != 'undefined' && window)
     window.setTimeout(()=>{
         console.log('Version:', version);
     },1000);
+version++;
+
+version++;
+
 version++;
 
 version++;
