@@ -240,6 +240,7 @@ class pathsClass{
         if(angleInfo.turnedCounter>ANGLE_LIMITS)
             return [];
 
+        //TODO apply analogous idea with score (only length and angles)
         if((level+Math.abs(x-this.line[1][0])+Math.abs(y-this.line[1][1]))>(this.bestPath*NO_PATHS_GREATER_THAN))
             return [];
 
@@ -255,11 +256,19 @@ class pathsClass{
                 return [];
         }
 
+        //break if try to go in a direction that I cannot reverse
+        if(angleInfo.turnedCounter-1>=ANGLE_LIMITS
+            && Math.abs(y-this.line[1][1])>1 && Math.abs(x-this.line[1][0])>1
+            && ((x<this.line[1][0] && angleInfo.direction == 3)
+            || (x>this.line[1][0] && angleInfo.direction == 1)
+            || (y<this.line[1][0] && angleInfo.direction == 4)
+            || (y>this.line[1][0] && angleInfo.direction == 2)))
+            return [];
+
         //break if I cannot reach the  target and I have not angles available
-        //TODO improve with higher and lower checks
-        if(angleInfo.turnedCounter==ANGLE_LIMITS
-            && (((angleInfo.direction == 1 || angleInfo.direction == 3) && Math.abs(y-this.line[1][1])>1)
-            || ((angleInfo.direction == 2 || angleInfo.direction == 4) && Math.abs(x-this.line[1][0])))>1)
+        if(angleInfo.turnedCounter>=ANGLE_LIMITS
+            && (((angleInfo.direction == 1 || angleInfo.direction == 3) && Math.abs(y-this.line[1][1])>1) //turn at the end
+            || ((angleInfo.direction == 2 || angleInfo.direction == 4) && Math.abs(x-this.line[1][0])>1)))
             return [];
 
 
@@ -360,6 +369,10 @@ else
 myTimeOut(()=>{
     console.log('Version:', version);
 },1000);
+
+version++;
+
+version++;
 
 version++;
 
