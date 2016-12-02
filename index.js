@@ -245,9 +245,13 @@ class pathsClass{
                 return [];
         }
 
-        //break if I cannot turn back
+        //break if I cannot reach the  target and I have not angles available
+        //TODO ...
+        /*if(angleInfo.turnedCounter==ANGLE_LIMITS && (false))
+            return [];*/
 
         let order = [1,2,3,4];
+        //TODO check this... do this only at the beginning?
         if(ORDER_LOGIC){
             //TODO improve if equal do the vertical actions
             //width
