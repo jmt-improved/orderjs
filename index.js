@@ -248,6 +248,7 @@ class pathsClass{
         let order = [1,2,3,4];
         if(ORDER_LOGIC){
             //TODO improve if equal do the vertical actions
+            //width
             if(y<this.line[1][1]){
                 order[0] = 2;
                 order[3] = 4;
@@ -255,6 +256,7 @@ class pathsClass{
                 order[0] = 4;
                 order[3] = 2;
             }
+            //height
             if(x<this.line[1][0]){
                 if(firstHDir!= 1)
                     console.log('dir changed to', 1);
@@ -317,13 +319,15 @@ class pathsClass{
     }
 }
 
-if(module != undefined)
+if(typeof module != "undefined" && module != undefined)
     module.exports = bestMatrix;
 
 var version = 0;
 window.setTimeout(()=>{
     console.log('Version:', version);
 },1000);
+version++;
+
 version++;
 
 version++;
