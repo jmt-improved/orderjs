@@ -82,6 +82,7 @@ var ALLOW_TWO_ANGLES = false; //allow to have two near angles, in the case this 
 var ANGLE_LIMITS = 3; //limits of the number of angle for each line, we can also use a number of angles greater than 3 since the Loss of performance is low
 var NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
 var ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation algohorithm
+var ADVANCED_DEBUG = false; //advanced debug log
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
@@ -242,7 +243,10 @@ var pathsClass = function () {
             angleInfo = angleInfo || { direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0 };
 
             if (x == this.line[1][0] && y == this.line[1][1]) {
-                if (level < this.bestPath) this.bestPath = level;
+                if (level < this.bestPath) {
+                    if (ADVANCED_DEBUG) console.log('new best path', level, this.bestPath);
+                    this.bestPath = level;
+                }
 
                 return [{ "level": level, "path": matrix }];
             }
@@ -281,12 +285,12 @@ var pathsClass = function () {
                 }
                 //height
                 if (x <= this.line[1][0]) {
-                    if (firstHDir != 1) console.log('dir changed to', 1);
+                    if (ADVANCED_DEBUG) if (firstHDir != 1) console.log('dir changed to', 1);
                     firstHDir = 1;
                     order[1] = 1;
                     order[2] = 3;
                 } else {
-                    if (firstHDir != 3) console.log('dir changed to', 3);
+                    if (ADVANCED_DEBUG) if (firstHDir != 3) console.log('dir changed to', 3);
                     firstHDir = 3;
                     order[1] = 3;
                     order[2] = 1;
@@ -349,6 +353,8 @@ var version = 0;
 if (typeof window != 'undefined' && window) window.setTimeout(function () {
     console.log('Version:', version);
 }, 1000);
+version++;
+
 version++;
 
 version++;
