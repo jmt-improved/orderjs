@@ -6,7 +6,8 @@ var lib = require('./index.js');
 function test(n,matrix,lines){
   console.log("Test " + n + "\n");
   var t0 = new Date().getTime();
-  console.log(lib(matrix, lines));
+  //console.log(lib(matrix, lines));
+    lib(matrix, lines);
   var t1 = new Date().getTime();
   console.log("It tooks " + (t1 - t0) + " milliseconds.\n\n");
  }
