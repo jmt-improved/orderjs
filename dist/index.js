@@ -215,6 +215,8 @@ function calculateAnglesNumber(matrix, x, y) {
     }).length;
 }
 
+var firstHDir = 0;
+
 var pathsClass = function () {
     function pathsClass(line, value, right) {
         _classCallCheck(this, pathsClass);
@@ -266,9 +268,13 @@ var pathsClass = function () {
                     order[3] = 2;
                 }
                 if (x < this.line[1][0]) {
+                    if (firstHDir != 1) console.log('dir changed to', 1);
+                    firstHDir = 1;
                     order[1] = 1;
                     order[2] = 3;
                 } else {
+                    if (firstHDir != 1) console.log('dir changed to', 3);
+                    firstHDir = 3;
                     order[1] = 3;
                     order[2] = 1;
                 }
