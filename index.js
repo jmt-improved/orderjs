@@ -201,6 +201,8 @@ function calculateAnglesNumber(matrix, x, y){
     }).length;
 }
 
+var firstHDir = 0;
+
 class pathsClass{
     constructor(line, value, right) {
         this.bestPath = 1000000;
@@ -254,9 +256,15 @@ class pathsClass{
                 order[3] = 2;
             }
             if(x<this.line[1][0]){
+                if(firstHDir!= 1)
+                    console.log('dir changed to', 1);
+                firstHDir = 1;
                 order[1] = 1;
                 order[2] = 3;
             }else{
+                if(firstHDir!= 1)
+                    console.log('dir changed to', 3);
+                firstHDir = 3;
                 order[1] = 3;
                 order[2] = 1;
             }
