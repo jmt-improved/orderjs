@@ -132,6 +132,7 @@ class combinationClass{
     constructor() {
         this.bestCombination = [];
         this.score = 1000000;
+        this.scoreTime = 0;
     }
 
     getCombinations(matrices, choosen, level){
@@ -143,7 +144,10 @@ class combinationClass{
         //console.log(level, firstElement, choosen);
         if(firstElement==choosen.length && choosen[firstElement]!=-1) {
             let merged = choosen.reduce((a, b, pos)=>a.mergeMatrix(matrices[pos][b]), matrices[choosen.length-1][choosen.pop()]); //remove last
+            let t0 = new Date().getTime();
             let score = calculateScore(merged);
+            let t1 = new Date().getTime();
+            this.scoreTime += t1-t0;
             if(score<this.score){
                 this.score = score;
                 this.bestCombination = merged;
@@ -161,7 +165,8 @@ class combinationClass{
     }
 
     getCombination(){
-        console.log(this.score);
+        console.log('score', this.score);
+        console.log('scoreTime', this.scoreTime);
         return this.bestCombination;
     }
 }
