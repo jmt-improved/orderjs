@@ -257,6 +257,8 @@ var pathsClass = function () {
                 if (!this.right && y < this.line[1][1]) return [];
             }
 
+            //break if I cannot turn back
+
             var order = [1, 2, 3, 4];
             if (ORDER_LOGIC) {
                 //TODO improve if equal do the vertical actions
@@ -269,7 +271,7 @@ var pathsClass = function () {
                     order[3] = 2;
                 }
                 //height
-                if (x < this.line[1][0]) {
+                if (x <= this.line[1][0]) {
                     if (firstHDir != 1) console.log('dir changed to', 1);
                     firstHDir = 1;
                     order[1] = 1;
@@ -284,8 +286,12 @@ var pathsClass = function () {
             counter++;
 
             for (var i = 0; i <= 3; i++) {
+                //no 180 angles
+                if (angleInfo.direction == 1 && order[i] == 3 || angleInfo.direction == 3 && order[i] == 1 || angleInfo.direction == 4 && order[i] == 2 || angleInfo.direction == 2 && order[i] == 4) break;
                 matrices = matrices.concat(this.nextStep(matrix, x, y, level, angleInfo, order[i]));
-            }return matrices;
+            }
+
+            return matrices;
         }
     }, {
         key: "nextStep",
@@ -331,9 +337,11 @@ var pathsClass = function () {
 if (typeof module != "undefined" && module != undefined) module.exports = bestMatrix;
 
 var version = 0;
-window.setTimeout(function () {
+if (typeof window != 'undefined' && window) window.setTimeout(function () {
     console.log('Version:', version);
 }, 1000);
+version++;
+
 version++;
 
 version++;
