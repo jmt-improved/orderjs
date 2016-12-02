@@ -262,7 +262,7 @@ class pathsClass{
                 order[1] = 1;
                 order[2] = 3;
             }else{
-                if(firstHDir!= 1)
+                if(firstHDir!= 3)
                     console.log('dir changed to', 3);
                 firstHDir = 3;
                 order[1] = 3;
@@ -323,5 +323,7 @@ var version = 0;
 window.setTimeout(()=>{
     console.log('Version:', version);
 },1000);
+version++;
+
 version++;
 
