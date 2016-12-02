@@ -349,10 +349,22 @@ if(typeof module != "undefined" && module != undefined)
     module.exports = bestMatrix;
 
 var version = 0;
+var myTimeOut = null;
 if(typeof window != 'undefined' && window)
-    window.setTimeout(()=>{
-        console.log('Version:', version);
-    },1000);
+    myTimeOut = window.setTimeout;
+else
+    myTimeOut = setTimeout;
+
+myTimeOut(()=>{
+    console.log('Version:', version);
+},1000);
+
+version++;
+
+version++;
+
+version++;
+
 version++;
 
 version++;

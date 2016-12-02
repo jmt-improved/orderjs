@@ -351,9 +351,19 @@ var pathsClass = function () {
 if (typeof module != "undefined" && module != undefined) module.exports = bestMatrix;
 
 var version = 0;
-if (typeof window != 'undefined' && window) window.setTimeout(function () {
+var myTimeOut = null;
+if (typeof window != 'undefined' && window) myTimeOut = window.setTimeout;else myTimeOut = setTimeout;
+
+myTimeOut(function () {
     console.log('Version:', version);
 }, 1000);
+
+version++;
+
+version++;
+
+version++;
+
 version++;
 
 version++;
