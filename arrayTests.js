@@ -42,6 +42,40 @@ Array.prototype.cloneEfficient = function(){
  console.log(matrix[0][0]);
  console.log(matrix2[0][0]);
  */
+Array.prototype.cloneEfficient2 = function(){
+    "use strict";
+    let ret = [];
+    for(let i = 0; i <this.length; i++) {
+        let value = this[i];
+        if (typeof value == 'object')
+            if (Array.isArray(value))
+                ret.push(value.cloneEfficient2());
+            else
+                ret.push(value.clone());
+        else
+            ret.push(value);
+    }
+    return ret;
+};
+
+function testClone(name){
+    "use strict";
+    executeWithTime(()=>{
+        "use strict";
+        var matrix = createMatrix(100,100);
+        for(var i=0;i<100; i++)
+            matrix[name]();
+    }, 'clone efficient matrices ('+name+')');
+
+
+    executeWithTime(()=>{
+        "use strict";
+        var data = [];
+        var matrix = createMatrix(100,100);
+        for(var i=0;i<100; i++)
+            data.push(matrix[name]());
+    }, 'clone efficient matrices with push ('+name+')');
+}
 
 executeWithTime(()=>{
     "use strict";
@@ -74,20 +108,5 @@ executeWithTime(()=>{
 }, 'clone matrices with push');
 
 
-executeWithTime(()=>{
-    "use strict";
-    var matrix = createMatrix(100,100);
-    for(var i=0;i<100; i++)
-        matrix.cloneEfficient();
-}, 'clone efficient matrices');
-
-
-executeWithTime(()=>{
-    "use strict";
-    var data = [];
-    var matrix = createMatrix(100,100);
-    for(var i=0;i<100; i++)
-        data.push(matrix.cloneEfficient());
-}, 'clone efficient matrices with push');
-
-
+testClone('cloneEfficient');
+testClone('cloneEfficient2');
