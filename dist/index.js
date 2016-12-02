@@ -273,7 +273,7 @@ var pathsClass = function () {
                     order[1] = 1;
                     order[2] = 3;
                 } else {
-                    if (firstHDir != 1) console.log('dir changed to', 3);
+                    if (firstHDir != 3) console.log('dir changed to', 3);
                     firstHDir = 3;
                     order[1] = 3;
                     order[2] = 1;
@@ -326,10 +326,14 @@ var pathsClass = function () {
     return pathsClass;
 }();
 
-module.exports = bestMatrix;
+if (module != undefined) module.exports = bestMatrix;
 
 var version = 0;
 window.setTimeout(function () {
     console.log('Version:', version);
 }, 1000);
+version++;
+
+version++;
+
 version++;
