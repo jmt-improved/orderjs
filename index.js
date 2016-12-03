@@ -135,7 +135,6 @@ function allMatrices(matrix, lines){
     t1 = new Date().getTime();
     console.log("Phase2 (filtering) " + (t1 - t0) + " milliseconds. Ration:", lengthBefore/lengthAfter, lengthBefore, lengthAfter);
 
-
     t0 = new Date().getTime();
     let combinationClassUsed = pointerClass == efficientPointer ? efficientCombinationClass : combinationClass;
     let combination = (new combinationClassUsed(matrix)).getCombinations(matrices).getCombination();
@@ -159,8 +158,7 @@ class combinationClass{
         choosen = choosen || Array.newWithElement(matrices.length, -1);
         let firstElement = level;
         //for(;choosen[firstElement]!=-1 && firstElement<choosen.length;firstElement++);
-        //console.log(level, firstElement, choosen);
-        if(firstElement==choosen.length && choosen[firstElement]!=-1) {
+        if(firstElement==choosen.length) {
             let t0 = new Date().getTime();
             let merged = choosen.reduce((a, b, pos)=>a.mergeMatrix(matrices[pos][b]), matrices[choosen.length-1][choosen.pop()]); //remove last
             let t1 = new Date().getTime();
@@ -210,7 +208,7 @@ class efficientCombinationClass{
         choosen = choosen || Array.newWithElement(matrices.length, -1);
         let firstElement = level;
 
-        if(firstElement==choosen.length && choosen[firstElement]!=-1) {
+        if(firstElement==choosen.length) {
             let t0 = new Date().getTime();
             let merged = this.mergePaths(matrices, choosen);
             let t1 = new Date().getTime();
