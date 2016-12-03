@@ -349,7 +349,7 @@ class pathsClass{
             return [];
 
         if(pointer.isValidPoint(x, y) && pointer.getValue(x,y) == 0) {
-            let tmpPointer = new this.pointerClass(this.baseMatrix, pointer.clone());
+            let tmpPointer = new this.pointerClass(pointer);
             tmpPointer.setValue(x,y, [this.value]);
             let tmpAngleInfo = angleInfo.clone();
             tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
@@ -366,10 +366,18 @@ class pathsClass{
 }
 
 class classicPointer{
-    constructor(matrix, pointer) {
-        this.matrix = matrix;
-        pointer = pointer || {"data" : matrix};
-        this.data = pointer.data.clone();
+    constructor(data) {
+        if(Array.isArray(data)) {
+            this.matrix = data;
+            data = {"data":data};
+        }else{
+            if(data == undefined || data.matrix == undefined || !Array.isArray(data.matrix))
+                throw new Error('wrong data passed');
+            this.matrix = data.matrix;
+        }
+        if(data == undefined || data.data == undefined || !Array.isArray(data.data))
+            throw new Error('wrong data passed');
+        this.data = data.data.clone();
     }
 
     setValue(x,y,value){
@@ -397,10 +405,18 @@ class classicPointer{
 }
 
 class efficientPointer{
-    constructor(matrix, pointer) {
-        this.matrix = matrix;
-        pointer = pointer || {data: {}};
-        this.data = pointer.data.clone();
+    constructor(data) {
+        if(Array.isArray(data)) {
+            this.matrix = data;
+            data = {data:{}};
+        }else {
+            if(data == undefined || data.matrix == undefined || !Array.isArray(data.matrix))
+                throw new Error('wrong data passed');
+            this.matrix = data.matrix;
+        }
+        if(data == undefined || data.data == undefined || typeof data.data != 'object')
+            throw new Error('wrong data passed');
+        this.data = data.data.clone();
     }
 
     setValue(x,y,value){

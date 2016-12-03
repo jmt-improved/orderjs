@@ -77,21 +77,30 @@ class efficientArray{
             return;
         }
 
-        let dataTmp = new this.pointerClass(this.base, data);
+        let dataTmp = new this.pointerClass(data);
         dataTmp.setValue(x+1, y, [1,2]);
         this.execute(x+1, y, dataTmp, level+1);
-        dataTmp = new this.pointerClass(this.base, data);
+        dataTmp = new this.pointerClass(data);
         dataTmp.setValue(x, y+1, [1,2]);
         this.execute(x, y+1, dataTmp, level+1);
     }
 }
 
 class classicPointer{
-    constructor(matrix, pointer) {
-        this.matrix = matrix;
-        pointer = pointer || {"data" : matrix};
-        this.data = pointer.data.clone();
+    constructor(data) {
+        if(Array.isArray(data)) {
+            this.matrix = data;
+            data = {"data":data};
+        }else{
+            if(data == undefined || data.matrix == undefined || !Array.isArray(data.matrix))
+                throw new Error('wrong data passed');
+            this.matrix = data.matrix;
+        }
+        if(data == undefined || data.data == undefined || !Array.isArray(data.data))
+            throw new Error('wrong data passed');
+        this.data = data.data.clone();
     }
+
 
     setValue(x,y,value){
         this.data[x][y] = value;
@@ -118,10 +127,18 @@ class classicPointer{
 }
 
 class efficientPointer{
-    constructor(matrix, pointer) {
-        this.matrix = matrix;
-        pointer = pointer || {data: {}};
-        this.data = pointer.data.clone();
+    constructor(data) {
+        if(Array.isArray(data)) {
+            this.matrix = data;
+            data = {data:{}};
+        }else {
+            if(data == undefined || data.matrix == undefined || !Array.isArray(data.matrix))
+                throw new Error('wrong data passed');
+            this.matrix = data.matrix;
+        }
+        if(data == undefined || data.data == undefined || typeof data.data != 'object')
+            throw new Error('wrong data passed');
+        this.data = data.data.clone();
     }
 
     setValue(x,y,value){
@@ -163,7 +180,7 @@ function pointerTest(pointerClass){
     let matrix = createMatrix(6,6);
     let pointerInstance = new pointerClass(matrix);
     pointerInstance.setValue(1,5,[6,5]);
-    let pointerInstance2 = new pointerClass(matrix, pointerInstance);
+    let pointerInstance2 = new pointerClass(pointerInstance);
     pointerInstance2.setValue(5,5,[9,5]);
     console.log(pointerInstance2.getValue(1,5));
     console.log(pointerInstance.getValue(5,5));
