@@ -1,6 +1,7 @@
 /**
  * Created by claudio on 02/12/16.
  */
+"use strict";
 global.NO_PRINT_VERSION = true;
 var lib = require('./index.js');
 
@@ -58,6 +59,79 @@ Array.prototype.cloneEfficient2 = function(){
     return ret;
 };
 
+class efficientArray{
+    constructor(pointerClass) {
+        this.base = createMatrix(100,100);
+        this.pointerClass = pointerClass;
+    }
+
+    execute(x, y, data, level){
+        x = x || 0;
+        y = y || 0;
+        data = data || new this.pointerClass(this.base);
+        level = level || 0;
+        //console.log(x, y, level);
+
+        if(level > 5) {
+            //console.log(Object.keys(data.data).length);
+            return;
+        }
+
+        let dataTmp = new this.pointerClass(this.base, data);
+        dataTmp.setValue(x+1, y, [1,2]);
+        this.execute(x+1, y, dataTmp, level+1);
+        dataTmp = new this.pointerClass(this.base, data);
+        dataTmp.setValue(x, y+1, [1,2]);
+        this.execute(x, y+1, dataTmp, level+1);
+    }
+}
+
+class pointer{
+    constructor(matrix, pointer) {
+        this.data = [];
+        pointer = pointer || {"matrix" : matrix};
+        this.matrix = pointer.matrix.clone();
+    }
+
+    setValue(x,y,value){
+        this.matrix[x][y] = value;
+    }
+
+    getValue(x,y){
+        return this.matrix[x][y];
+    }
+}
+
+class efficientPointer{
+    constructor(matrix, pointer) {
+        this.matrix = matrix;
+        pointer = pointer || {data: {}};
+        this.data = pointer.data.clone();
+    }
+
+    setValue(x,y,value){
+        if(this.data['k'+x] == undefined)
+            this.data['k'+x] = {};
+        this.data['k'+x]['k'+y] = value;
+    }
+
+    getValue(x,y){
+        let xData = this.data['k'+x] || {};
+        return xData['k'+y] || this.matrix[x][y];
+    }
+}
+
+function pointerTest(pointerClass){
+    let matrix = createMatrix(100,100);
+    let pointerInstance = new pointerClass(matrix);
+    pointerInstance.setValue(1,5,[6,5]);
+    let pointerInstance2 = new pointerClass(matrix, pointerInstance);
+    pointerInstance2.setValue(5,5,[9,5]);
+    console.log(pointerInstance2.getValue(1,5));
+    console.log(pointerInstance.getValue(5,5));
+    console.log(pointerInstance2.getValue(5,5));
+}
+
 function testClone(name){
     "use strict";
     executeWithTime(()=>{
@@ -110,3 +184,17 @@ executeWithTime(()=>{
 
 testClone('cloneEfficient');
 testClone('cloneEfficient2');
+
+executeWithTime(()=>{
+    "use strict";
+    new efficientArray(pointer).execute();
+}, 'efficient array entire clone');
+
+executeWithTime(()=>{
+    "use strict";
+    new efficientArray(efficientPointer).execute();
+}, 'efficient array pointer clone');
+
+// PROOF
+pointerTest(pointer);
+pointerTest(efficientPointer);
