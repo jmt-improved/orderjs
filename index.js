@@ -263,8 +263,8 @@ class efficientCombinationClass{
         return this.baseMatrix
             .map((value1, key1)=>{
                 return value1.map((value2, key2)=>{
-                    if(this.bestCombination[key1] != undefined && this.bestCombination[key1][key2] != undefined)
-                        return this.bestCombination[key1][key2];
+                    if(this.bestCombination['k'+key1] != undefined && this.bestCombination['k'+key1]['k'+key2] != undefined)
+                        return this.bestCombination['k'+key1]['k'+key2];
                    return value2;
                 });
             })
@@ -325,7 +325,8 @@ function efficientCalculateScore(matrix){
                 return ;
             score += (value2.length-1)*OVERLAPPING_SCORE;
             score += value2.length*LENGTH_SCORE;
-            score += efficientCalculateAnglesNumber(matrix, key1.substr(1), key2.substr(1))*ANGLE_SCORE;
+            let angles = efficientCalculateAnglesNumber(matrix, parseInt(key1.substr(1)), parseInt(key2.substr(1)));
+            score += angles*ANGLE_SCORE;
         });
     });
 
@@ -593,6 +594,7 @@ class efficientPointer{
     }
 }
 
+//pointerClass = classicPointer;
 pointerClass = efficientPointer;
 
 if(typeof module != "undefined" && module != undefined)
