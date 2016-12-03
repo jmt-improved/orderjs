@@ -44,6 +44,21 @@ Object.prototype.search = function(x, y,value){
     return ret>=0;
 };
 
+Object.prototype.efficientSearch = function(x, y,value){
+    "use strict";
+    let obj = this;
+    obj = obj['k'+x];
+    if(obj == undefined)
+        return false;
+    obj = obj['k'+y];
+    if(obj == undefined)
+        return false;
+    if(!Array.isArray(obj))
+        return false;
+    let ret = obj.indexOf(value);
+    return ret>=0;
+};
+
 Object.prototype.clone = function(){
     "use strict";
     return JSON.parse(JSON.stringify(this));
@@ -122,7 +137,8 @@ function allMatrices(matrix, lines){
 
 
     t0 = new Date().getTime();
-    let combination = (new combinationClass()).getCombinations(matrices).getCombination();
+    let combinationClassUsed = pointerClass == efficientPointer ? efficientCombinationClass : combinationClass;
+    let combination = (new combinationClassUsed(matrix)).getCombinations(matrices).getCombination();
     t1 = new Date().getTime();
     console.log("Phase3 (combinations & score) " + (t1 - t0) + " milliseconds.");
     return combination;
@@ -134,20 +150,25 @@ class combinationClass{
         this.bestCombination = [];
         this.score = 1000000;
         this.scoreTime = 0;
+        this.mergeTime = 0;
     }
 
     getCombinations(matrices, choosen, level){
         "use strict";
         level = level || 0;
         choosen = choosen || Array.newWithElement(matrices.length, -1);
-        let firstElement = 0;
-        for(;choosen[firstElement]!=-1 && firstElement<choosen.length;firstElement++);
+        let firstElement = level;
+        //for(;choosen[firstElement]!=-1 && firstElement<choosen.length;firstElement++);
         //console.log(level, firstElement, choosen);
         if(firstElement==choosen.length && choosen[firstElement]!=-1) {
-            let merged = choosen.reduce((a, b, pos)=>a.mergeMatrix(matrices[pos][b]), matrices[choosen.length-1][choosen.pop()]); //remove last
             let t0 = new Date().getTime();
-            let score = calculateScore(merged);
+            let merged = choosen.reduce((a, b, pos)=>a.mergeMatrix(matrices[pos][b]), matrices[choosen.length-1][choosen.pop()]); //remove last
             let t1 = new Date().getTime();
+            this.mergeTime += t1-t0;
+
+            t0 = new Date().getTime();
+            let score = calculateScore(merged);
+            t1 = new Date().getTime();
             this.scoreTime += t1-t0;
             if(score<this.score){
                 this.score = score;
@@ -168,7 +189,86 @@ class combinationClass{
     getCombination(){
         console.log('score', this.score);
         console.log('scoreTime', this.scoreTime);
+        console.log('mergeTime', this.mergeTime);
         return this.bestCombination;
+    }
+}
+
+class efficientCombinationClass{
+
+    constructor(baseMatrix) {
+        this.bestCombination = [];
+        this.score = 1000000;
+        this.scoreTime = 0;
+        this.mergeTime = 0;
+        this.baseMatrix = baseMatrix;
+    }
+
+    getCombinations(matrices, choosen, level){
+        "use strict";
+        level = level || 0;
+        choosen = choosen || Array.newWithElement(matrices.length, -1);
+        let firstElement = level;
+
+        if(firstElement==choosen.length && choosen[firstElement]!=-1) {
+            let t0 = new Date().getTime();
+            let merged = this.mergePaths(matrices, choosen);
+            let t1 = new Date().getTime();
+            this.mergeTime += t1-t0;
+
+            t0 = new Date().getTime();
+            let score = efficientCalculateScore(merged);
+            t1 = new Date().getTime();
+            this.scoreTime += t1-t0;
+            if(score<this.score){
+                this.score = score;
+                this.bestCombination = merged;
+            }
+            return this;
+        }
+
+        matrices[firstElement]
+            .forEach((value, pos)=>{
+                let tmpChosen = choosen.clone();
+                tmpChosen[firstElement] = pos;
+                this.getCombinations(matrices, tmpChosen, level+1);
+            });
+        return this;
+    }
+
+    mergePaths(matrices, choosen){
+        let ret = {};
+        choosen.forEach((cValue1, cKey1)=>{
+            let matrix = matrices[cKey1][cValue1];
+            Object.keys(matrix).forEach(key1=>{
+                let value1 = matrix[key1];
+                if(ret[key1] == undefined)
+                    ret[key1] = {};
+                Object.keys(value1).forEach(key2=>{
+                    let value2 = value1[key2];
+                    if(ret[key1][key2] == undefined)
+                        ret[key1][key2] = [];
+                    ret[key1][key2] = ret[key1][key2].concat(value2);
+                });
+            });
+        });
+
+        return ret;
+    }
+
+    getCombination(){
+        console.log('score', this.score);
+        console.log('scoreTime', this.scoreTime);
+        console.log('mergeTime', this.mergeTime);
+        return this.baseMatrix
+            .map((value1, key1)=>{
+                return value1.map((value2, key2)=>{
+                    if(this.bestCombination[key1] != undefined && this.bestCombination[key1][key2] != undefined)
+                        return this.bestCombination[key1][key2];
+                   return value2;
+                });
+            })
+        ;
     }
 }
 
@@ -214,6 +314,37 @@ function calculateAnglesNumber(matrix, x, y){
     }).length;
 }
 
+function efficientCalculateScore(matrix){
+    "use strict";
+    let score = 0;
+    Object.keys(matrix).forEach(key1=>{
+        let value1 = matrix[key1];
+        Object.keys(value1).forEach(key2=>{
+            let value2 = value1[key2];
+            if(!Array.isArray(value2) || value2.length == 0)
+                return ;
+            score += (value2.length-1)*OVERLAPPING_SCORE;
+            score += value2.length*LENGTH_SCORE;
+            score += efficientCalculateAnglesNumber(matrix, key1.substr(1), key2.substr(1))*ANGLE_SCORE;
+        });
+    });
+
+    return score;
+}
+
+function efficientCalculateAnglesNumber(matrix, x, y){
+    "use strict";
+    let values = matrix['k'+x]['k'+y];
+    return values.filter(value=>{
+        if((matrix.efficientSearch(x-1, y, value) && matrix.efficientSearch(x,y+1,value))
+            || (matrix.efficientSearch(x-1,y,value) && matrix.efficientSearch(x,y-1,value))
+            || (matrix.efficientSearch(x+1, y, value) && matrix.efficientSearch(x,y+1,value))
+            || (matrix.efficientSearch(x+1,y,value) && matrix.efficientSearch(x,y-1,value)))
+            return true;
+        return false;
+    }).length;
+}
+
 var firstHDir = 0;
 
 class pathsClass{
@@ -240,7 +371,7 @@ class pathsClass{
                 this.bestPath = level;
             }
 
-            return [{"level": level, "path":pointer.getCompleteArray()}];
+            return [{"level": level, "path":pointer.getForPathVar()}];
         }
 
         if(angleInfo.turned)
@@ -392,6 +523,10 @@ class classicPointer{
         return this.data;
     }
 
+    getForPathVar(){
+        return this.getCompleteArray();
+    }
+
     isValidPoint(x, y){
         "use strict";
         let obj = this.matrix[x];
@@ -440,6 +575,10 @@ class efficientPointer{
                     return value2;
                 });
             })
+    }
+
+    getForPathVar(){
+        return this.data;
     }
 
     isValidPoint(x, y){
