@@ -86,19 +86,23 @@ class efficientArray{
     }
 }
 
-class pointer{
+class classicPointer{
     constructor(matrix, pointer) {
-        this.data = [];
-        pointer = pointer || {"matrix" : matrix};
-        this.matrix = pointer.matrix.clone();
+        this.matrix = matrix;
+        pointer = pointer || {"data" : matrix};
+        this.data = pointer.data.clone();
     }
 
     setValue(x,y,value){
-        this.matrix[x][y] = value;
+        this.data[x][y] = value;
     }
 
     getValue(x,y){
-        return this.matrix[x][y];
+        return this.data[x][y];
+    }
+
+    getCompleteArray(){
+        return this.data;
     }
 }
 
@@ -120,10 +124,21 @@ class efficientPointer{
         let xData = this.data['k'+x] || {};
         return xData['k'+y] || this.matrix[x][y];
     }
+
+    getCompleteArray(){
+        return this.matrix
+            .map((value1, key1)=>{
+                return value1.map((value2,key2)=>{
+                   if(this.data['k'+key1] != undefined && this.data['k'+key1]['k'+key2] != undefined)
+                       return this.data['k'+key1]['k'+key2];
+                   return value2;
+                });
+            })
+    }
 }
 
 function pointerTest(pointerClass){
-    let matrix = createMatrix(100,100);
+    let matrix = createMatrix(6,6);
     let pointerInstance = new pointerClass(matrix);
     pointerInstance.setValue(1,5,[6,5]);
     let pointerInstance2 = new pointerClass(matrix, pointerInstance);
@@ -131,6 +146,7 @@ function pointerTest(pointerClass){
     console.log(pointerInstance2.getValue(1,5));
     console.log(pointerInstance.getValue(5,5));
     console.log(pointerInstance2.getValue(5,5));
+    console.log(pointerInstance2.getCompleteArray());
 }
 
 function testClone(name){
@@ -188,7 +204,7 @@ testClone('cloneEfficient2');
 
 executeWithTime(()=>{
     "use strict";
-    new efficientArray(pointer).execute();
+    new efficientArray(classicPointer).execute();
 }, 'efficient array entire clone');
 
 executeWithTime(()=>{
@@ -197,5 +213,5 @@ executeWithTime(()=>{
 }, 'efficient array pointer clone');
 
 // PROOF
-pointerTest(pointer);
+pointerTest(classicPointer);
 pointerTest(efficientPointer);
