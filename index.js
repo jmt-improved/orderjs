@@ -78,6 +78,7 @@ const ANGLE_LIMITS = 3; //limits of the number of angle for each line, we can al
 const NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
 const ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation algohorithm
 const ADVANCED_DEBUG = false; //advanced debug log
+var pointerClass = {};
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
@@ -178,8 +179,8 @@ function findMatricesOfLine(matrix, lines, pos){
     var y = lines[pos-1][0][1];
     matrix = matrix.clone();
     matrix[x][y] = [pos];
-    var paths = new pathsClass(lines[pos-1], pos, lines[pos-1][0][1]<lines[pos-1][1][1]);
-    return {"paths": paths.allPaths(matrix, x,y), bestPath: paths.bestPath};
+    var paths = new pathsClass(matrix, lines[pos-1], pos, lines[pos-1][0][1]<lines[pos-1][1][1]);
+    return {"paths": paths.allPaths(null, x,y), bestPath: paths.bestPath};
 }
 
 
@@ -216,16 +217,19 @@ function calculateAnglesNumber(matrix, x, y){
 var firstHDir = 0;
 
 class pathsClass{
-    constructor(line, value, right) {
+    constructor(baseMatrix, line, value, right) {
         this.bestPath = 1000000;
+        this.baseMatrix = baseMatrix;
         this.line = line;
         this.value = value;
         this.right = right;
+        this.pointerClass = pointerClass;
     }
 
-    allPaths(matrix, x, y, level, angleInfo){
+    allPaths(pointer, x, y, level, angleInfo){
         "use strict";
         var matrices = [];
+        pointer = pointer || new this.pointerClass(this.baseMatrix);
         level = level || 0;
         angleInfo = angleInfo || {direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0};
 
@@ -236,7 +240,7 @@ class pathsClass{
                 this.bestPath = level;
             }
 
-            return [{"level": level, "path":matrix}];
+            return [{"level": level, "path":pointer.getCompleteArray()}];
         }
 
         if(angleInfo.turned)
@@ -315,13 +319,13 @@ class pathsClass{
                 || angleInfo.direction == 4 && order[i] == 2
                 || angleInfo.direction == 2 && order[i] == 4)
                 break;
-            matrices = matrices.concat(this.nextStep(matrix, x, y, level, angleInfo, order[i]));
+            matrices = matrices.concat(this.nextStep(pointer, x, y, level, angleInfo, order[i]));
         }
 
         return matrices;
     }
 
-    nextStep(matrix, x, y, level, angleInfo, direction){
+    nextStep(pointer, x, y, level, angleInfo, direction){
         "use strict";
         switch (direction){
             case 1:
@@ -344,9 +348,9 @@ class pathsClass{
         if(direction == 4 && !(!this.right || !RIGHT_CONSTRAINT))
             return [];
 
-        if(matrix.isValidPoint(x, y) && matrix[x][y] == 0) {
-            let tmpMatrix = matrix.clone();
-            tmpMatrix[x][y] = [this.value];
+        if(pointer.isValidPoint(x, y) && pointer.getValue(x,y) == 0) {
+            let tmpPointer = new this.pointerClass(this.baseMatrix, pointer.clone());
+            tmpPointer.setValue(x,y, [this.value]);
             let tmpAngleInfo = angleInfo.clone();
             tmpAngleInfo.previousPreviousDirection = tmpAngleInfo.previousDirection;
             tmpAngleInfo.previousDirection = tmpAngleInfo.direction;
@@ -355,11 +359,86 @@ class pathsClass{
                 tmpAngleInfo.turned++;
             else
                 tmpAngleInfo.turned = 0;
-            return this.allPaths(tmpMatrix, x, y, level + 1, tmpAngleInfo);
+            return this.allPaths(tmpPointer, x, y, level + 1, tmpAngleInfo);
         }
         return [];
     }
 }
+
+class classicPointer{
+    constructor(matrix, pointer) {
+        this.matrix = matrix;
+        pointer = pointer || {"data" : matrix};
+        this.data = pointer.data.clone();
+    }
+
+    setValue(x,y,value){
+        this.data[x][y] = value;
+    }
+
+    getValue(x,y){
+        return this.data[x][y];
+    }
+
+    getCompleteArray(){
+        return this.data;
+    }
+
+    isValidPoint(x, y){
+        "use strict";
+        let obj = this.matrix[x];
+        if(obj == undefined)
+            return false;
+        obj = obj[y];
+        if(obj == undefined)
+            return false;
+        return true;
+    }
+}
+
+class efficientPointer{
+    constructor(matrix, pointer) {
+        this.matrix = matrix;
+        pointer = pointer || {data: {}};
+        this.data = pointer.data.clone();
+    }
+
+    setValue(x,y,value){
+        //keys used to prevent big array length
+        if(this.data['k'+x] == undefined)
+            this.data['k'+x] = {};
+        this.data['k'+x]['k'+y] = value;
+    }
+
+    getValue(x,y){
+        let xData = this.data['k'+x] || {};
+        return xData['k'+y] || this.matrix[x][y];
+    }
+
+    getCompleteArray(){
+        return this.matrix
+            .map((value1, key1)=>{
+                return value1.map((value2,key2)=>{
+                    if(this.data['k'+key1] != undefined && this.data['k'+key1]['k'+key2] != undefined)
+                        return this.data['k'+key1]['k'+key2];
+                    return value2;
+                });
+            })
+    }
+
+    isValidPoint(x, y){
+        "use strict";
+        let obj = this.matrix[x];
+        if(obj == undefined)
+            return false;
+        obj = obj[y];
+        if(obj == undefined)
+            return false;
+        return true;
+    }
+}
+
+pointerClass = efficientPointer;
 
 if(typeof module != "undefined" && module != undefined)
     module.exports = bestMatrix;
