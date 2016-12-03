@@ -104,6 +104,17 @@ class classicPointer{
     getCompleteArray(){
         return this.data;
     }
+
+    isValidPoint(x, y){
+        "use strict";
+        let obj = this.matrix[x];
+        if(obj == undefined)
+            return false;
+        obj = obj[y];
+        if(obj == undefined)
+            return false;
+        return true;
+    }
 }
 
 class efficientPointer{
@@ -134,6 +145,17 @@ class efficientPointer{
                    return value2;
                 });
             })
+    }
+
+    isValidPoint(x, y){
+        "use strict";
+        let obj = this.matrix[x];
+        if(obj == undefined)
+            return false;
+        obj = obj[y];
+        if(obj == undefined)
+            return false;
+        return true;
     }
 }
 
