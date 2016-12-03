@@ -256,19 +256,22 @@ class efficientCombinationClass{
         return ret;
     }
 
+    getMatrix(matrix){
+        return this.baseMatrix
+            .map((value1, key1)=>{
+                return value1.map((value2, key2)=>{
+                    if(matrix['k'+key1] != undefined && matrix['k'+key1]['k'+key2] != undefined)
+                        return matrix['k'+key1]['k'+key2];
+                    return value2;
+                });
+            });
+    }
+
     getCombination(){
         console.log('score', this.score);
         console.log('scoreTime', this.scoreTime);
         console.log('mergeTime', this.mergeTime);
-        return this.baseMatrix
-            .map((value1, key1)=>{
-                return value1.map((value2, key2)=>{
-                    if(this.bestCombination['k'+key1] != undefined && this.bestCombination['k'+key1]['k'+key2] != undefined)
-                        return this.bestCombination['k'+key1]['k'+key2];
-                   return value2;
-                });
-            })
-        ;
+        return this.getMatrix(this.bestCombination);
     }
 }
 
@@ -278,7 +281,6 @@ function findMatricesOfLine(matrix, lines, pos){
     var x = lines[pos-1][0][0];
     var y = lines[pos-1][0][1];
     matrix = matrix.clone();
-    matrix[x][y] = [pos];
     var paths = new pathsClass(matrix, lines[pos-1], pos, lines[pos-1][0][1]<lines[pos-1][1][1]);
     return {"paths": paths.allPaths(null, x,y), bestPath: paths.bestPath};
 }
@@ -361,7 +363,11 @@ class pathsClass{
     allPaths(pointer, x, y, level, angleInfo){
         "use strict";
         var matrices = [];
-        pointer = pointer || new this.pointerClass(this.baseMatrix);
+        if(!pointer){
+            pointer = new this.pointerClass(this.baseMatrix);
+            pointer.setValue(x,y, [this.value]);
+        }
+
         level = level || 0;
         angleInfo = angleInfo || {direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0};
 
