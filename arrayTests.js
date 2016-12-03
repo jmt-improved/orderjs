@@ -110,6 +110,7 @@ class efficientPointer{
     }
 
     setValue(x,y,value){
+        //keys used to prevent big array length
         if(this.data['k'+x] == undefined)
             this.data['k'+x] = {};
         this.data['k'+x]['k'+y] = value;
