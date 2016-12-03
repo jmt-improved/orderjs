@@ -225,6 +225,7 @@ class efficientCombinationClass{
             return this;
         }
 
+        //TODO this can be impelemnted with a single cicle a sort of counter
         matrices[firstElement]
             .forEach((value, pos)=>{
                 let tmpChosen = choosen.clone();
