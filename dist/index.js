@@ -624,9 +624,11 @@ var version = 0;
 var myTimeOut = null;
 if (typeof window != 'undefined' && window) myTimeOut = window.setTimeout;else myTimeOut = setTimeout;
 
-if (typeof global.NO_PRINT_VERSION == 'undefined') myTimeOut(function () {
+if (global == undefined || typeof global.NO_PRINT_VERSION == 'undefined') myTimeOut(function () {
     console.log('Version:', version);
 }, 1000);
+
+version++;
 
 version++;
 
