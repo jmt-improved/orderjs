@@ -12,6 +12,26 @@ function test(n,matrix,lines){
   console.log("It tooks " + (t1 - t0) + " milliseconds.\n\n");
  }
 
+ function createMatrix(n,m){
+     var matrix = [];
+     for(var i=0; i<n/2; i++) {
+       matrix[i] = new Array(m).fill(0);
+     }
+
+     a1 = new Array(m).fill(-1);
+     for (var i=m/2; i<(m/4)*3; i++){
+       a1[i] = 0;
+     }
+     //components are all in the mid of matrix
+     for(var i=n/2; i<(n/4)*3; i++) {
+       matrix[i] = a1;
+     }
+     for(var i=(n/4)*3; i<n; i++) {
+       matrix[i] = new Array(m).fill(0);
+     }
+     return matrix;
+ }
+
  /*
  * Test 2: 7x7 matrix, 2 lines
  */
@@ -86,36 +106,56 @@ test(3,matrix3,lines3);
 * Test 4: 50x50 matrix, 6 lines
 */
 
-
-function createMatrix(){
-    var matrix = [];
-    for(var i=0; i<25; i++) {
-      matrix[i] = new Array(50).fill(0);
-    }
-
-    a1 = new Array(50).fill(-1);
-    for (var i=20; i<30; i++){
-      a1[i] = 0;
-    }
-
-    for(var i=25; i<35; i++) {
-      matrix[i] = a1;
-    }
-    for(var i=35; i<50; i++) {
-      matrix[i] = new Array(50).fill(0);
-    }
-    return matrix;
-}
-
-matrix4 = createMatrix();
+matrix4 = createMatrix(50,50);
 
 var lines4 = [
     [[1,1],[5,0]],
     [[2,3],[3,0]],
     [[5,2],[3,3]],
     [[2,4],[7,1]],
-    [[9,12],[10,5]],
+    [[9,13],[10,5]],
     [[3,4],[11,5]],
 ];
 
 test(4,matrix4,lines4);
+
+/*
+* Test 5: 100x100 matrix, 6 lines
+*/
+
+matrix5 = createMatrix(100,100);
+
+var lines5 = [
+    [[1,1],[5,0]],
+    [[2,3],[3,0]],
+    [[5,2],[3,3]],
+    [[2,4],[7,1]],
+    [[9,13],[10,5]],
+    [[3,4],[11,5]],
+];
+
+test(5,matrix5,lines5);
+
+/*
+* Test 6: 100x100 matrix, 15 lines
+*/
+
+matrix5 = createMatrix(100,100);
+
+var lines5 = [
+    [[1,1],[5,0]],
+    [[2,3],[3,0]],
+    [[5,2],[3,3]],
+    [[2,4],[7,1]],
+    [[9,13],[10,5]],
+    [[3,4],[11,5]],
+    [[10,1],[5,1]],
+    [[11,3],[3,1]],
+    /*[[12,2],[3,8]],
+    [[13,4],[7,2]],
+    [[14,13],[10,8]],
+    [[15,4],[11,1]],
+    */
+];
+
+test(6,matrix5,lines5);
