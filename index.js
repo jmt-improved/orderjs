@@ -765,10 +765,12 @@ if(typeof window != 'undefined' && window)
 else
     myTimeOut = setTimeout;
 
-if(global == undefined || typeof global.NO_PRINT_VERSION == 'undefined')
+if(typeof global == "undefined" || typeof global.NO_PRINT_VERSION == 'undefined')
     myTimeOut(()=>{
         console.log('Version:', version);
     },1000);
+
+version++;
 
 version++;
 
