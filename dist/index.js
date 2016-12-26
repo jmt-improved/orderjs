@@ -98,8 +98,8 @@ var ANGLE_LIMITS = 3; //limits of the number of angle for each line, we can also
 var NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
 var ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation algohorithm
 var ADVANCED_DEBUG = false; //advanced debug log
-var COMBINATION_DIM = 2; //max dim of subgroups for combinations
-var COMBINATION_MAX_BESTS = 10; //max number of bests to take
+var COMBINATION_DIM = 2; //max dim of subgroups for combinations. Increase this increases the time, but also the precision
+var COMBINATION_MAX_BESTS = 10; //max number of bests to take. Increase this increases the time, but also the precision
 var pointerClass = {};
 var pointerEfficientClass = {};
 /*
@@ -308,7 +308,6 @@ var efficient2CombinationClass = function () {
         _classCallCheck(this, efficient2CombinationClass);
 
         this.bestCombination = [];
-        this.score = 1000000;
         this.scoreTime = 0;
         this.mergeTime = 0;
         this.addTime = 0;
@@ -413,7 +412,7 @@ var efficient2CombinationClass = function () {
     }, {
         key: "getCombination",
         value: function getCombination() {
-            console.log('score', this.score);
+            console.log('score', efficientCalculateScore(this.bestCombination));
             console.log('scoreTime', this.scoreTime);
             console.log('mergeTime', this.mergeTime);
             console.log('addTime', this.addTime);
@@ -799,6 +798,8 @@ if (typeof window != 'undefined' && window) myTimeOut = window.setTimeout;else m
 if (typeof global == "undefined" || typeof global.NO_PRINT_VERSION == 'undefined') myTimeOut(function () {
     console.log('Version:', version);
 }, 1000);
+
+version++;
 
 version++;
 

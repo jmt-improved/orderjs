@@ -93,8 +93,8 @@ const ANGLE_LIMITS = 3; //limits of the number of angle for each line, we can al
 const NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
 const ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation algohorithm
 const ADVANCED_DEBUG = false; //advanced debug log
-const COMBINATION_DIM = 2; //max dim of subgroups for combinations
-const COMBINATION_MAX_BESTS = 10; //max number of bests to take
+const COMBINATION_DIM = 2; //max dim of subgroups for combinations. Increase this increases the time, but also the precision
+const COMBINATION_MAX_BESTS = 10; //max number of bests to take. Increase this increases the time, but also the precision
 var pointerClass = {};
 var pointerEfficientClass = {};
 /*
@@ -768,6 +768,8 @@ if(typeof global == "undefined" || typeof global.NO_PRINT_VERSION == 'undefined'
     myTimeOut(()=>{
         console.log('Version:', version);
     },1000);
+
+version++;
 
 version++;
 
