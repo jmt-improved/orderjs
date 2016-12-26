@@ -25,7 +25,6 @@ function getBests(array, offset, len, maxBests){
 
         let merged = merge(arrays);
         bests.add(merged, calculateScore(merged));
-        //console.log(arrays, calculateScore(arrays));
     }
     console.log(bests.getData());
     return bests.getData();
@@ -85,7 +84,7 @@ class bestsClass{
 
         for(let i = 0; i<this.data.length; i++){
             if(value<this.data[i].value){
-                let limit = Math.min(this.data.length, this.limit);
+                let limit = Math.min(this.data.length, this.limit-1); //-1 to remove element over limit
                 let newData = this.data.slice(0, i);
                 newData.push({"value": value, "data": data});
                 newData = newData.concat(this.data.slice(i,limit));
@@ -104,4 +103,4 @@ var arrayTest = [
 ];
 
 //console.log(getBests(arrayTest, 0, 3, 10));
-console.log(recursiveBest(arrayTest, 2, 10));
+console.log(recursiveBest(arrayTest, 2, 4));
