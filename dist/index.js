@@ -369,7 +369,7 @@ var efficient2CombinationClass = function () {
             var newArray = [];
             if (steps > 1) for (var i = 0; i < array.length; i += steps) {
                 var tmpArray = array.slice(i, Math.min(array.length, i + steps));
-                var tmp = getCombinations(tmpArray, dim, maxBests);
+                var tmp = this.recursiveBest(tmpArray, dim, maxBests);
                 newArray.push(tmp);
             } else newArray = array;
             return this.getBests(newArray, 0, newArray.length, maxBests);
@@ -799,6 +799,8 @@ if (typeof window != 'undefined' && window) myTimeOut = window.setTimeout;else m
 if (typeof global == "undefined" || typeof global.NO_PRINT_VERSION == 'undefined') myTimeOut(function () {
     console.log('Version:', version);
 }, 1000);
+
+version++;
 
 version++;
 

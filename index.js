@@ -333,7 +333,7 @@ class efficient2CombinationClass{
         if(steps>1)
             for(var i = 0; i < array.length; i+=steps) {
                 let tmpArray = array.slice(i, Math.min(array.length, i+steps));
-                let tmp = getCombinations(tmpArray, dim, maxBests);
+                let tmp = this.recursiveBest(tmpArray, dim, maxBests);
                 newArray.push(tmp);
             }
         else
@@ -769,6 +769,8 @@ if(typeof global == "undefined" || typeof global.NO_PRINT_VERSION == 'undefined'
     myTimeOut(()=>{
         console.log('Version:', version);
     },1000);
+
+version++;
 
 version++;
 
