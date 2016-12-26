@@ -280,7 +280,6 @@ class efficientCombinationClass{
 class efficient2CombinationClass{
     constructor(baseMatrix) {
         this.bestCombination = [];
-        this.score = 1000000;
         this.scoreTime = 0;
         this.mergeTime = 0;
         this.addTime = 0;
@@ -379,7 +378,7 @@ class efficient2CombinationClass{
     }
 
     getCombination(){
-        console.log('score', this.score);
+        console.log('score', efficientCalculateScore(this.bestCombination));
         console.log('scoreTime', this.scoreTime);
         console.log('mergeTime', this.mergeTime);
         console.log('addTime', this.addTime);
