@@ -140,8 +140,6 @@ function allMatrices(matrix, lines){
     t0 = new Date().getTime();
     let combinationClassUsed = pointerClass == efficientPointer ? efficient2CombinationClass : combinationClass;
     let combination = (new combinationClassUsed(matrix)).getCombinations(matrices).getCombination();
-    if(pointerClass == efficientPointer)
-        combination = combination[0];
     t1 = new Date().getTime();
     console.log("Phase3 (combinations & score) " + (t1 - t0) + " milliseconds.");
     return combination;
@@ -328,9 +326,7 @@ class efficient2CombinationClass{
         return bests.getData();
     }
 
-    getCombinations(array, dim, maxBests){
-        dim = dim || COMBINATION_DIM;
-        maxBests = maxBests || COMBINATION_MAX_BESTS;
+    recursiveBest(array, dim, maxBests){
         var steps = Math.floor(array.length/dim);
         var newArray = [];
         if(steps>1)
@@ -344,21 +340,41 @@ class efficient2CombinationClass{
         return this.getBests(newArray, 0, newArray.length, maxBests);
     }
 
-    mergePaths(matrix){
+    getCombinations(array, dim, maxBests){
+        dim = dim || COMBINATION_DIM;
+        maxBests = maxBests || COMBINATION_MAX_BESTS;
+        this.bestCombination = this.recursiveBest(array,dim, maxBests)[0];
+        return this;
+    }
+
+    mergePaths(matrices){
         let ret = {};
-        Object.keys(matrix).forEach(key1=>{
-            let value1 = matrix[key1];
-            if(ret[key1] == undefined)
-                ret[key1] = {};
-            Object.keys(value1).forEach(key2=>{
-                let value2 = value1[key2];
-                if(ret[key1][key2] == undefined)
-                    ret[key1][key2] = [];
-                ret[key1][key2] = ret[key1][key2].concat(value2);
+        matrices.forEach((matrix)=> {
+            Object.keys(matrix).forEach(key1=> {
+                let value1 = matrix[key1];
+                if (ret[key1] == undefined)
+                    ret[key1] = {};
+                Object.keys(value1).forEach(key2=> {
+                    let value2 = value1[key2];
+                    if (ret[key1][key2] == undefined)
+                        ret[key1][key2] = [];
+                    ret[key1][key2] = ret[key1][key2].concat(value2);
+                });
             });
         });
 
         return ret;
+    }
+
+    getMatrix(matrix){
+        return this.baseMatrix
+            .map((value1, key1)=>{
+                return value1.map((value2, key2)=>{
+                    if(matrix['k'+key1] != undefined && matrix['k'+key1]['k'+key2] != undefined)
+                        return matrix['k'+key1]['k'+key2];
+                    return value2;
+                });
+            });
     }
 
     getCombination(){
