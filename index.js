@@ -96,6 +96,7 @@ const ADVANCED_DEBUG = false; //advanced debug log
 const COMBINATION_DIM = 2; //max dim of subgroups for combinations
 const COMBINATION_MAX_BESTS = 10; //max number of bests to take
 var pointerClass = {};
+var pointerEfficientClass = {};
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
@@ -138,7 +139,7 @@ function allMatrices(matrix, lines){
     console.log("Phase2 (filtering) " + (t1 - t0) + " milliseconds. Ration:", lengthBefore/lengthAfter, lengthBefore, lengthAfter);
 
     t0 = new Date().getTime();
-    let combinationClassUsed = pointerClass == efficientPointer ? efficient2CombinationClass : combinationClass;
+    let combinationClassUsed = pointerClass == efficientPointer ? pointerEfficientClass : combinationClass;
     let combination = (new combinationClassUsed(matrix)).getCombinations(matrices).getCombination();
     t1 = new Date().getTime();
     console.log("Phase3 (combinations & score) " + (t1 - t0) + " milliseconds.");
@@ -752,6 +753,7 @@ class efficientPointer{
 
 //pointerClass = classicPointer;
 pointerClass = efficientPointer;
+pointerEfficientClass = efficient2CombinationClass;
 
 if(typeof module != "undefined" && module != undefined)
     module.exports = bestMatrix;
