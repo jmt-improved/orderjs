@@ -98,7 +98,10 @@ var ANGLE_LIMITS = 3; //limits of the number of angle for each line, we can also
 var NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
 var ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation algohorithm
 var ADVANCED_DEBUG = false; //advanced debug log
+var COMBINATION_DIM = 2; //max dim of subgroups for combinations
+var COMBINATION_MAX_BESTS = 10; //max number of bests to take
 var pointerClass = {};
+var pointerEfficientClass = {};
 /*
 * BEST CONFIG for performance
 * RIGHT_CONSTRAINT = true;
@@ -144,7 +147,7 @@ function allMatrices(matrix, lines) {
     console.log("Phase2 (filtering) " + (t1 - t0) + " milliseconds. Ration:", lengthBefore / lengthAfter, lengthBefore, lengthAfter);
 
     t0 = new Date().getTime();
-    var combinationClassUsed = pointerClass == efficientPointer ? efficientCombinationClass : combinationClass;
+    var combinationClassUsed = pointerClass == efficientPointer ? pointerEfficientClass : combinationClass;
     var combination = new combinationClassUsed(matrix).getCombinations(matrices).getCombination();
     t1 = new Date().getTime();
     console.log("Phase3 (combinations & score) " + (t1 - t0) + " milliseconds.");
@@ -250,6 +253,7 @@ var efficientCombinationClass = function () {
                 return this;
             }
 
+            //TODO this can be impelemnted with a single cicle a sort of counter
             matrices[firstElement].forEach(function (value, pos) {
                 var tmpChosen = choosen.clone();
                 tmpChosen[firstElement] = pos;
@@ -297,6 +301,173 @@ var efficientCombinationClass = function () {
     }]);
 
     return efficientCombinationClass;
+}();
+
+var efficient2CombinationClass = function () {
+    function efficient2CombinationClass(baseMatrix) {
+        _classCallCheck(this, efficient2CombinationClass);
+
+        this.bestCombination = [];
+        this.score = 1000000;
+        this.scoreTime = 0;
+        this.mergeTime = 0;
+        this.addTime = 0;
+        this.baseMatrix = baseMatrix;
+    }
+
+    _createClass(efficient2CombinationClass, [{
+        key: "getBests",
+        value: function getBests(array, offset, len, maxBests) {
+            var _this3 = this;
+
+            var lengths = [];
+            var totLength = 1;
+            var arrayAllied = [];
+            lengths[0] = 1;
+            for (var i = offset; i < len; i++) {
+                lengths[i - offset + 1] = array[i].length;
+                totLength *= array[i].length;
+                arrayAllied.push(array[i]);
+            }
+
+            var bests = new bestsClass(maxBests);
+
+            var _loop = function _loop() {
+                var grandPos = i;
+                var arrays = arrayAllied.map(function (value, key) {
+                    grandPos = Math.floor(grandPos / lengths[key]);
+                    var pos = grandPos % lengths[key + 1];
+                    return value[pos];
+                });
+
+                var t0 = new Date().getTime();
+                var merged = _this3.mergePaths(arrays);
+                var t1 = new Date().getTime();
+                _this3.mergeTime += t1 - t0;
+
+                t0 = new Date().getTime();
+                var score = efficientCalculateScore(merged);
+                t1 = new Date().getTime();
+                _this3.scoreTime += t1 - t0;
+
+                t0 = new Date().getTime();
+                bests.add(merged, score);
+                t1 = new Date().getTime();
+                _this3.addTime += t1 - t0;
+            };
+
+            for (var i = 0; i < totLength; i++) {
+                _loop();
+            }
+            //console.log(bests.getData());
+            return bests.getData();
+        }
+    }, {
+        key: "recursiveBest",
+        value: function recursiveBest(array, dim, maxBests) {
+            var steps = Math.floor(array.length / dim);
+            var newArray = [];
+            if (steps > 1) for (var i = 0; i < array.length; i += steps) {
+                var tmpArray = array.slice(i, Math.min(array.length, i + steps));
+                var tmp = getCombinations(tmpArray, dim, maxBests);
+                newArray.push(tmp);
+            } else newArray = array;
+            return this.getBests(newArray, 0, newArray.length, maxBests);
+        }
+    }, {
+        key: "getCombinations",
+        value: function getCombinations(array, dim, maxBests) {
+            dim = dim || COMBINATION_DIM;
+            maxBests = maxBests || COMBINATION_MAX_BESTS;
+            this.bestCombination = this.recursiveBest(array, dim, maxBests)[0];
+            return this;
+        }
+    }, {
+        key: "mergePaths",
+        value: function mergePaths(matrices) {
+            var ret = {};
+            matrices.forEach(function (matrix) {
+                Object.keys(matrix).forEach(function (key1) {
+                    var value1 = matrix[key1];
+                    if (ret[key1] == undefined) ret[key1] = {};
+                    Object.keys(value1).forEach(function (key2) {
+                        var value2 = value1[key2];
+                        if (ret[key1][key2] == undefined) ret[key1][key2] = [];
+                        ret[key1][key2] = ret[key1][key2].concat(value2);
+                    });
+                });
+            });
+
+            return ret;
+        }
+    }, {
+        key: "getMatrix",
+        value: function getMatrix(matrix) {
+            return this.baseMatrix.map(function (value1, key1) {
+                return value1.map(function (value2, key2) {
+                    if (matrix['k' + key1] != undefined && matrix['k' + key1]['k' + key2] != undefined) return matrix['k' + key1]['k' + key2];
+                    return value2;
+                });
+            });
+        }
+    }, {
+        key: "getCombination",
+        value: function getCombination() {
+            console.log('score', this.score);
+            console.log('scoreTime', this.scoreTime);
+            console.log('mergeTime', this.mergeTime);
+            console.log('addTime', this.addTime);
+            return this.getMatrix(this.bestCombination);
+        }
+    }]);
+
+    return efficient2CombinationClass;
+}();
+
+var bestsClass = function () {
+    function bestsClass(limit) {
+        _classCallCheck(this, bestsClass);
+
+        this.limit = limit;
+        this.data = [];
+    }
+
+    _createClass(bestsClass, [{
+        key: "getData",
+        value: function getData() {
+            return this.data.map(function (value) {
+                return value.data;
+            });
+        }
+    }, {
+        key: "getLastData",
+        value: function getLastData() {
+            if (this.data.length == 0) return { data: [], value: 0 };
+            return this.data[this.data.length - 1];
+        }
+    }, {
+        key: "add",
+        value: function add(data, value) {
+            if (value > this.getLastData().value) {
+                if (this.data.length >= this.limit) return;
+                this.data.push({ "value": value, "data": data });
+                return;
+            }
+
+            for (var i = 0; i < this.data.length; i++) {
+                if (value < this.data[i].value) {
+                    var limit = Math.min(this.data.length, this.limit - 1); //-1 to remove element over limit
+                    var newData = this.data.slice(0, i);
+                    newData.push({ "value": value, "data": data });
+                    newData = newData.concat(this.data.slice(i, limit));
+                    this.data = newData;
+                    return;
+                }
+            }
+        }
+    }]);
+
+    return bestsClass;
 }();
 
 function findMatricesOfLine(matrix, lines, pos) {
@@ -583,11 +754,11 @@ var efficientPointer = function () {
     }, {
         key: "getCompleteArray",
         value: function getCompleteArray() {
-            var _this3 = this;
+            var _this4 = this;
 
             return this.matrix.map(function (value1, key1) {
                 return value1.map(function (value2, key2) {
-                    if (_this3.data['k' + key1] != undefined && _this3.data['k' + key1]['k' + key2] != undefined) return _this3.data['k' + key1]['k' + key2];
+                    if (_this4.data['k' + key1] != undefined && _this4.data['k' + key1]['k' + key2] != undefined) return _this4.data['k' + key1]['k' + key2];
                     return value2;
                 });
             });
@@ -617,6 +788,7 @@ var efficientPointer = function () {
 
 
 pointerClass = efficientPointer;
+pointerEfficientClass = efficient2CombinationClass;
 
 if (typeof module != "undefined" && module != undefined) module.exports = bestMatrix;
 
@@ -627,6 +799,8 @@ if (typeof window != 'undefined' && window) myTimeOut = window.setTimeout;else m
 if (global == undefined || typeof global.NO_PRINT_VERSION == 'undefined') myTimeOut(function () {
     console.log('Version:', version);
 }, 1000);
+
+version++;
 
 version++;
 
