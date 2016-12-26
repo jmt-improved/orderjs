@@ -93,6 +93,8 @@ const ANGLE_LIMITS = 3; //limits of the number of angle for each line, we can al
 const NO_PATHS_GREATER_THAN = 2; //the limit is based on the best solution find until that moment
 const ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation algohorithm
 const ADVANCED_DEBUG = false; //advanced debug log
+const COMBINATION_DIM = 2; //max dim of subgroups for combinations
+const COMBINATION_MAX_BESTS = 10; //max number of bests to take
 var pointerClass = {};
 /*
 * BEST CONFIG for performance
@@ -136,8 +138,10 @@ function allMatrices(matrix, lines){
     console.log("Phase2 (filtering) " + (t1 - t0) + " milliseconds. Ration:", lengthBefore/lengthAfter, lengthBefore, lengthAfter);
 
     t0 = new Date().getTime();
-    let combinationClassUsed = pointerClass == efficientPointer ? efficientCombinationClass : combinationClass;
+    let combinationClassUsed = pointerClass == efficientPointer ? efficient2CombinationClass : combinationClass;
     let combination = (new combinationClassUsed(matrix)).getCombinations(matrices).getCombination();
+    if(pointerClass == efficientPointer)
+        combination = combination[0];
     t1 = new Date().getTime();
     console.log("Phase3 (combinations & score) " + (t1 - t0) + " milliseconds.");
     return combination;
@@ -271,6 +275,137 @@ class efficientCombinationClass{
         console.log('scoreTime', this.scoreTime);
         console.log('mergeTime', this.mergeTime);
         return this.getMatrix(this.bestCombination);
+    }
+}
+
+class efficient2CombinationClass{
+    constructor(baseMatrix) {
+        this.bestCombination = [];
+        this.score = 1000000;
+        this.scoreTime = 0;
+        this.mergeTime = 0;
+        this.addTime = 0;
+        this.baseMatrix = baseMatrix;
+    }
+
+    getBests(array, offset, len, maxBests){
+        var lengths = [];
+        var totLength = 1;
+        var arrayAllied = [];
+        lengths[0] = 1;
+        for(var i = offset; i<len; i++){
+            lengths[i-offset+1] = array[i].length;
+            totLength *= array[i].length;
+            arrayAllied.push(array[i]);
+        }
+
+        var bests = new bestsClass(maxBests);
+
+        for(var i = 0; i<totLength; i++){
+            let grandPos = i;
+            let arrays = arrayAllied.map((value, key)=>{
+                grandPos = Math.floor(grandPos/lengths[key]);
+                let pos = grandPos%lengths[key+1];
+                return value[pos];
+            });
+
+            let t0 = new Date().getTime();
+            let merged = this.mergePaths(arrays);
+            let t1 = new Date().getTime();
+            this.mergeTime += t1-t0;
+
+            t0 = new Date().getTime();
+            let score = efficientCalculateScore(merged);
+            t1 = new Date().getTime();
+            this.scoreTime += t1-t0;
+
+            t0 = new Date().getTime();
+            bests.add(merged, score);
+            t1 = new Date().getTime();
+            this.addTime += t1-t0;
+        }
+        //console.log(bests.getData());
+        return bests.getData();
+    }
+
+    getCombinations(array, dim, maxBests){
+        dim = dim || COMBINATION_DIM;
+        maxBests = maxBests || COMBINATION_MAX_BESTS;
+        var steps = Math.floor(array.length/dim);
+        var newArray = [];
+        if(steps>1)
+            for(var i = 0; i < array.length; i+=steps) {
+                let tmpArray = array.slice(i, Math.min(array.length, i+steps));
+                let tmp = getCombinations(tmpArray, dim, maxBests);
+                newArray.push(tmp);
+            }
+        else
+            newArray = array;
+        return this.getBests(newArray, 0, newArray.length, maxBests);
+    }
+
+    mergePaths(matrix){
+        let ret = {};
+        Object.keys(matrix).forEach(key1=>{
+            let value1 = matrix[key1];
+            if(ret[key1] == undefined)
+                ret[key1] = {};
+            Object.keys(value1).forEach(key2=>{
+                let value2 = value1[key2];
+                if(ret[key1][key2] == undefined)
+                    ret[key1][key2] = [];
+                ret[key1][key2] = ret[key1][key2].concat(value2);
+            });
+        });
+
+        return ret;
+    }
+
+    getCombination(){
+        console.log('score', this.score);
+        console.log('scoreTime', this.scoreTime);
+        console.log('mergeTime', this.mergeTime);
+        console.log('addTime', this.addTime);
+        return this.getMatrix(this.bestCombination);
+    }
+}
+
+class bestsClass{
+
+    constructor(limit) {
+        this.limit = limit;
+        this.data = [];
+    }
+
+    getData(){
+        return this.data.map(value=>value.data);
+    }
+
+
+    getLastData(){
+        if(this.data.length==0)
+            return {data:[], value: 0};
+        return this.data[this.data.length-1];
+    }
+
+    add(data, value){
+        if(value>this.getLastData().value){
+            if(this.data.length>=this.limit)
+                return ;
+            this.data.push({"value": value, "data": data});
+            return ;
+        }
+
+        for(let i = 0; i<this.data.length; i++){
+            if(value<this.data[i].value){
+                let limit = Math.min(this.data.length, this.limit-1); //-1 to remove element over limit
+                let newData = this.data.slice(0, i);
+                newData.push({"value": value, "data": data});
+                newData = newData.concat(this.data.slice(i,limit));
+                this.data = newData;
+                return ;
+            }
+        }
     }
 }
 
