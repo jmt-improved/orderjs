@@ -23,15 +23,37 @@ function getBests(array, offset, len, maxBests){
             return value[pos];
         });
 
-        bests.add(arrays, calculateScore(arrays));
+        let merged = merge(arrays);
+        bests.add(merged, calculateScore(merged));
         //console.log(arrays, calculateScore(arrays));
     }
-    console.log(bests.data);
+    console.log(bests.getData());
+    return bests.getData();
+}
+
+function recursiveBest(array, dim, maxBests){
+    var steps = Math.floor(array.length/dim);
+    var newArray = [];
+    if(steps>1)
+        for(var i = 0; i < array.length; i+=steps) {
+            let tmpArray = array.slice(i, Math.min(array.length, i+steps));
+            let tmp = recursiveBest(tmpArray, dim, maxBests);
+            newArray.push(tmp);
+        }
+    else
+        newArray = array;
+    return getBests(newArray, 0, newArray.length, maxBests);
+}
+
+//fake merge
+function merge(arrays){
+    return arrays.reduce((a,b)=>a+b,0);
 }
 
 //fake calculator
 function calculateScore(arrays){
-    return arrays.reduce((a,b)=>a+b,0);
+    return arrays;
+    //return arrays.reduce((a,b)=>a+b,0);
 }
 
 
@@ -40,6 +62,10 @@ class bestsClass{
     constructor(limit) {
         this.limit = limit;
         this.data = [];
+    }
+
+    getData(){
+        return this.data.map(value=>value.data);
     }
 
 
@@ -77,4 +103,5 @@ var arrayTest = [
     [1,2],
 ];
 
-getBests(arrayTest, 0, 3, 10);
+//console.log(getBests(arrayTest, 0, 3, 10));
+console.log(recursiveBest(arrayTest, 2, 10));
