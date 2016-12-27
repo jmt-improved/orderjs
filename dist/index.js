@@ -100,6 +100,7 @@ var ORDER_LOGIC = true; //this allows to adopt some heuristics to the generation
 var ADVANCED_DEBUG = false; //advanced debug log
 var COMBINATION_DIM = 2; //max dim of subgroups for combinations. Increase this increases the time, but also the precision
 var COMBINATION_MAX_BESTS = 10; //max number of bests to take. Increase this increases the time, but also the precision
+var PATHS_LIMIT = 10; //max number of feasible candidate paths for a line
 var pointerClass = {};
 var pointerEfficientClass = {};
 /*
@@ -547,6 +548,7 @@ var pathsClass = function () {
         this.value = value;
         this.right = right;
         this.pointerClass = pointerClass;
+        this.solutionsFound = 0;
     }
 
     _createClass(pathsClass, [{
@@ -555,6 +557,9 @@ var pathsClass = function () {
             "use strict";
 
             var matrices = [];
+
+            if (this.solutionsFound > PATHS_LIMIT) return [];
+
             if (!pointer) {
                 pointer = new this.pointerClass(this.baseMatrix);
                 pointer.setValue(x, y, [this.value]);
@@ -563,12 +568,14 @@ var pathsClass = function () {
             level = level || 0;
             angleInfo = angleInfo || { direction: 0, turned: 0, previousDirection: 0, previousPreviousDirection: 0, turnedCounter: 0 };
 
+            //solution found
             if (x == this.line[1][0] && y == this.line[1][1]) {
                 if (level < this.bestPath) {
                     if (ADVANCED_DEBUG) console.log('new best path', level, this.bestPath);
                     this.bestPath = level;
                 }
 
+                this.solutionsFound++;
                 return [{ "level": level, "path": pointer.getForPathVar() }];
             }
 
@@ -798,6 +805,8 @@ if (typeof window != 'undefined' && window) myTimeOut = window.setTimeout;else m
 if (typeof global == "undefined" || typeof global.NO_PRINT_VERSION == 'undefined') myTimeOut(function () {
     console.log('Version:', version);
 }, 1000);
+
+version++;
 
 version++;
 
